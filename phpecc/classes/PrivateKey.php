@@ -39,14 +39,14 @@ class PrivateKey implements PrivateKeyInterface {
         if (extension_loaded('gmp') && USE_EXT=='GMP') {
             $G = $this->public_key->getGenerator();
             $n = $G->getOrder();
-            $k = gmp_Utils::gmp_mod2($random_k, $n);
+            $k = gmp_Utils2::gmp_mod2($random_k, $n);
             $p1 = Point::mul($k, $G);
             $r = $p1->getX();
 
             if (gmp_cmp($r, 0) == 0) {
                 throw new ErrorException("error: random number R = 0 <br />");
             }
-            $s = gmp_Utils::gmp_mod2(gmp_mul(NumberTheory::inverse_mod($k, $n), gmp_Utils::gmp_mod2(gmp_add($hash, gmp_mul($this->secret_multiplier, $r)), $n)), $n);
+            $s = gmp_Utils2::gmp_mod2(gmp_mul(NumberTheory::inverse_mod($k, $n), gmp_Utils2::gmp_mod2(gmp_add($hash, gmp_mul($this->secret_multiplier, $r)), $n)), $n);
 
             if (gmp_cmp($s, 0) == 0) {
                 throw new ErrorExcpetion("error: random number S = 0<br />");
@@ -84,7 +84,7 @@ class PrivateKey implements PrivateKeyInterface {
                 $result = "";
                 while (gmp_cmp($x, 0) > 0) {
                     $q = gmp_div($x, 256, 0);
-                    $r = gmp_Utils::gmp_mod2($x, 256);
+                    $r = gmp_Utils2::gmp_mod2($x, 256);
                     $ascii = chr($r);
 
                     $result = $ascii . $result;

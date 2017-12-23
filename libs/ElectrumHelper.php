@@ -47,13 +47,13 @@ class ElectrumHelper
         $gen = new Point($curve, $params['x'], $params['y'], $params['n']);
 
         if (USE_EXT == 'GMP') {
-            $x = gmp_Utils::gmp_hexdec('0x' . substr($mpk, 0, 64));
-            $y = gmp_Utils::gmp_hexdec('0x' . substr($mpk, 64, 64));
-            $z = gmp_Utils::gmp_hexdec('0x' . hash('sha256', hash('sha256', $index . ':0:' . pack('H*', $mpk), TRUE)));
+            $x = gmp_Utils2::gmp_hexdec('0x' . substr($mpk, 0, 64));
+            $y = gmp_Utils2::gmp_hexdec('0x' . substr($mpk, 64, 64));
+            $z = gmp_Utils2::gmp_hexdec('0x' . hash('sha256', hash('sha256', $index . ':0:' . pack('H*', $mpk), TRUE)));
 
             $pt = Point::add(new Point($curve, $x, $y), Point::mul($z, $gen));
 
-            $keystr = "\x04" . str_pad(gmp_Utils::gmp_dec2base($pt->getX(), 256), 32, "\x0", STR_PAD_LEFT) . str_pad(gmp_Utils::gmp_dec2base($pt->getY(), 256), 32, "\x0", STR_PAD_LEFT);
+            $keystr = "\x04" . str_pad(gmp_Utils2::gmp_dec2base($pt->getX(), 256), 32, "\x0", STR_PAD_LEFT) . str_pad(gmp_Utils2::gmp_dec2base($pt->getY(), 256), 32, "\x0", STR_PAD_LEFT);
         }
         elseif (USE_EXT === 'BCMATH') {
             $x = bchmath_Utils::bchexdec('0x' . substr($mpk, 0, 64));
@@ -124,7 +124,7 @@ class ElectrumHelper
 
         if (USE_EXT === 'GMP') {
             $pubkey_point = Point::add(
-                Point::mul(gmp_Utils::gmp_base2dec(substr($keystr, 0, 32), 256), $gen),
+                Point::mul(gmp_Utils2::gmp_base2dec(substr($keystr, 0, 32), 256), $gen),
                 self::ser_to_point($key, $curve, $gen)
             );
         }
@@ -191,13 +191,13 @@ class ElectrumHelper
             if ($key[0] === "\x04") {
                 return new Point(
                     $curve,
-                    gmp_Utils::gmp_base2dec(substr($key, 1, 32), 256),
-                    gmp_Utils::gmp_base2dec(substr($key, 33), 256),
+                    gmp_Utils2::gmp_base2dec(substr($key, 1, 32), 256),
+                    gmp_Utils2::gmp_base2dec(substr($key, 33), 256),
                     $order
                 );
             }
 
-            $Mx = gmp_Utils::gmp_base2dec(substr($key, 1), 256);
+            $Mx = gmp_Utils2::gmp_base2dec(substr($key, 1), 256);
         }
         elseif (USE_EXT === 'BCMATH') {
             if ($key[0] === "\x04") {
@@ -301,7 +301,7 @@ class ElectrumHelper
                 $num = gmp_add($num, gmp_mul($j, strval(strpos($alphabet, $input[$i]))));
             }
 
-            return gmp_Utils::gmp_dec2base(gmp_strval($num), 256);
+            return gmp_Utils2::gmp_dec2base(gmp_strval($num), 256);
         }
         elseif (USE_EXT === 'BCMATH') {
             for ($i = strlen($input) - 1, $j = "1"; $i >= 0; $i--, $j = bcmul($j, $base)) {
@@ -317,7 +317,7 @@ class ElectrumHelper
 
     public static function int_to_hex_pad($int, $pad) {
         if (USE_EXT === 'GMP') {
-            $hex = gmp_Utils::gmp_dec2base($int, 16);
+            $hex = gmp_Utils2::gmp_dec2base($int, 16);
         }
         elseif (USE_EXT === 'BCMATH') {
             $hex = bchmath_Utils::dec2base($int, 16);
@@ -345,7 +345,7 @@ class ElectrumHelper
 
         $encoded = '';
         if (USE_EXT === 'GMP') {
-            $num = gmp_Utils::gmp_base2dec($input, 256);
+            $num = gmp_Utils2::gmp_base2dec($input, 256);
             while (intval($num) >= $base) {
                 $div = gmp_strval(gmp_div($num, $base));
                 $mod = gmp_strval(gmp_mod($num, $base));
@@ -390,12 +390,12 @@ class ElectrumHelper
     public static function secp256k1_params() {
         if (USE_EXT === 'GMP') {
             return array(
-                'p' => gmp_Utils::gmp_hexdec('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'),
-                'a' => gmp_Utils::gmp_hexdec('0x0000000000000000000000000000000000000000000000000000000000000000'),
-                'b' => gmp_Utils::gmp_hexdec('0x0000000000000000000000000000000000000000000000000000000000000007'),
-                'n' => gmp_Utils::gmp_hexdec('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141'),
-                'x' => gmp_Utils::gmp_hexdec("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"),
-                'y' => gmp_Utils::gmp_hexdec("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8")
+                'p' => gmp_Utils2::gmp_hexdec('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'),
+                'a' => gmp_Utils2::gmp_hexdec('0x0000000000000000000000000000000000000000000000000000000000000000'),
+                'b' => gmp_Utils2::gmp_hexdec('0x0000000000000000000000000000000000000000000000000000000000000007'),
+                'n' => gmp_Utils2::gmp_hexdec('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141'),
+                'x' => gmp_Utils2::gmp_hexdec("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"),
+                'y' => gmp_Utils2::gmp_hexdec("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8")
             );
         }
         elseif (USE_EXT === 'BCMATH') {
