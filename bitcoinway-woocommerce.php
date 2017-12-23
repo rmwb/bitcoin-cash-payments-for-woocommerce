@@ -14,7 +14,7 @@ License: GNU General Public License 2.0 (GPL) http://www.gnu.org/licenses/gpl.ht
 
 
 // Include everything
-include (dirname(__FILE__) . '/bwwc-include-all.php');
+include (dirname(__FILE__) . '/bchwc-include-all.php');
 
 //---------------------------------------------------------------------------
 // Add hooks and filters
@@ -38,29 +38,29 @@ function BWWC_activate()
 {
     global  $g_BWWC__config_defaults;
 
-    $bwwc_default_options = $g_BWWC__config_defaults;
+    $bchwc_default_options = $g_BWWC__config_defaults;
 
     // This will overwrite default options with already existing options but leave new options (in case of upgrading to new version) untouched.
-    $bwwc_settings = BWWC__get_settings ();
+    $bchwc_settings = BWWC__get_settings ();
 
-    foreach ($bwwc_settings as $key=>$value)
-    	$bwwc_default_options[$key] = $value;
+    foreach ($bchwc_settings as $key=>$value)
+    	$bchwc_default_options[$key] = $value;
 
-    update_option (BWWC_SETTINGS_NAME, $bwwc_default_options);
+    update_option (BWWC_SETTINGS_NAME, $bchwc_default_options);
 
     // Re-get new settings.
-    $bwwc_settings = BWWC__get_settings ();
+    $bchwc_settings = BWWC__get_settings ();
 
     // Create necessary database tables if not already exists...
-    BWWC__create_database_tables ($bwwc_settings);
+    BWWC__create_database_tables ($bchwc_settings);
     BWWC__SubIns ();
 
     //----------------------------------
     // Setup cron jobs
 
-    if ($bwwc_settings['enable_soft_cron_job'] && !wp_next_scheduled('BWWC_cron_action'))
+    if ($bchwc_settings['enable_soft_cron_job'] && !wp_next_scheduled('BWWC_cron_action'))
     {
-    	$cron_job_schedule_name = strpos($_SERVER['HTTP_HOST'], 'ttt.com')===FALSE ? $bwwc_settings['soft_cron_job_schedule_name'] : 'seconds_30';
+    	$cron_job_schedule_name = strpos($_SERVER['HTTP_HOST'], 'ttt.com')===FALSE ? $bchwc_settings['soft_cron_job_schedule_name'] : 'seconds_30';
     	wp_schedule_event(time(), $cron_job_schedule_name, 'BWWC_cron_action');
     }
     //----------------------------------
@@ -97,9 +97,9 @@ function BWWC_deactivate ()
 // uninstalling
 function BWWC_uninstall ()
 {
-    $bwwc_settings = BWWC__get_settings();
+    $bchwc_settings = BWWC__get_settings();
 
-    if ($bwwc_settings['delete_db_tables_on_uninstall'])
+    if ($bchwc_settings['delete_db_tables_on_uninstall'])
     {
         // delete all settings.
         delete_option(BWWC_SETTINGS_NAME);
@@ -120,27 +120,27 @@ function BWWC_create_menu()
         __('Woo Bitcoin Cash', BWWC_I18N_DOMAIN),                    // Page title
         __('Bitcoin Cash', BWWC_I18N_DOMAIN),                        // Menu Title - lower corner of admin menu
         'administrator',                                        // Capability
-        'bwwc-settings',                                        // Handle - First submenu's handle must be equal to parent's handle to avoid duplicate menu entry.
+        'bchwc-settings',                                        // Handle - First submenu's handle must be equal to parent's handle to avoid duplicate menu entry.
         'BWWC__render_general_settings_page',                   // Function
 
         plugins_url('/images/bitcoin_16x.png', __FILE__)      // Icon URL
         );
 
     add_submenu_page (
-        'bwwc-settings',                                        // Parent
+        'bchwc-settings',                                        // Parent
         __("WooCommerce Bitcoin Cash Payments Gateway", BWWC_I18N_DOMAIN),                   // Page title
         __("General Settings", BWWC_I18N_DOMAIN),               // Menu Title
         'administrator',                                        // Capability
-        'bwwc-settings',                                        // Handle - First submenu's handle must be equal to parent's handle to avoid duplicate menu entry.
+        'bchwc-settings',                                        // Handle - First submenu's handle must be equal to parent's handle to avoid duplicate menu entry.
         'BWWC__render_general_settings_page'                    // Function
         );
 
     add_submenu_page (
-        'bwwc-settings',                                        // Parent
+        'bchwc-settings',                                        // Parent
         __("Bitcoin Cash Plugin Advanced Settings", BWWC_I18N_DOMAIN),       // Page title
         __("Advanced Settings", BWWC_I18N_DOMAIN),                // Menu title
         'administrator',                                        // Capability
-        'bwwc-settings-advanced',                        // Handle - First submenu's handle must be equal to parent's handle to avoid duplicate menu entry.
+        'bchwc-settings-advanced',                        // Handle - First submenu's handle must be equal to parent's handle to avoid duplicate menu entry.
         'BWWC__render_advanced_settings_page'            // Function
         );
 }

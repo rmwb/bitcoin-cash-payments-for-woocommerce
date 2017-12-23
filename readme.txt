@@ -103,7 +103,7 @@ Once you installed and activated WooCommerce, you may install and activate Bitco
 * Fixed: very slow loading due to MtGox exchange rate API issues.
 
 = 1.26 =
-* Fixed PHP warnings for repeated 'define's within bwwc-include-all.php
+* Fixed PHP warnings for repeated 'define's within bchwc-include-all.php
 
 = 1.25 =
 * Implemented security check (secret_key validation logic) to prevent spoofed IPN requests.
