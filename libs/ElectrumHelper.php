@@ -56,13 +56,13 @@ class ElectrumHelper
             $keystr = "\x04" . str_pad(gmp_Utils::gmp_dec2base($pt->getX(), 256), 32, "\x0", STR_PAD_LEFT) . str_pad(gmp_Utils::gmp_dec2base($pt->getY(), 256), 32, "\x0", STR_PAD_LEFT);
         }
         elseif (USE_EXT === 'BCMATH') {
-            $x = bcmath_Utils::bchexdec('0x' . substr($mpk, 0, 64));
-            $y = bcmath_Utils::bchexdec('0x' . substr($mpk, 64, 64));
-            $z = bcmath_Utils::bchexdec('0x' . hash('sha256', hash('sha256', $index . ':0:' . pack('H*', $mpk), TRUE)));
+            $x = bchmath_Utils::bchexdec('0x' . substr($mpk, 0, 64));
+            $y = bchmath_Utils::bchexdec('0x' . substr($mpk, 64, 64));
+            $z = bchmath_Utils::bchexdec('0x' . hash('sha256', hash('sha256', $index . ':0:' . pack('H*', $mpk), TRUE)));
 
             $pt = Point::add(new Point($curve, $x, $y), Point::mul($z, $gen));
 
-            $keystr = "\x04" . str_pad(bcmath_Utils::dec2base($pt->getX(), 256), 32, "\x0", STR_PAD_LEFT) . str_pad(bcmath_Utils::dec2base($pt->getY(), 256), 32, "\x0", STR_PAD_LEFT);
+            $keystr = "\x04" . str_pad(bchmath_Utils::dec2base($pt->getX(), 256), 32, "\x0", STR_PAD_LEFT) . str_pad(bchmath_Utils::dec2base($pt->getY(), 256), 32, "\x0", STR_PAD_LEFT);
         }
         else {
             throw new ErrorException("Unknown math module");
@@ -130,7 +130,7 @@ class ElectrumHelper
         }
         elseif (USE_EXT === 'BCMATH') {
             $pubkey_point = Point::add(
-                Point::mul(bcmath_Utils::base2dec(substr($keystr, 0, 32), 256), $gen),
+                Point::mul(bchmath_Utils::base2dec(substr($keystr, 0, 32), 256), $gen),
                 self::ser_to_point($key, $curve, $gen)
             );
         }
@@ -203,13 +203,13 @@ class ElectrumHelper
             if ($key[0] === "\x04") {
                 return new Point(
                     $curve,
-                    bcmath_Utils::base2dec(substr($key, 1, 32), 256),
-                    bcmath_Utils::base2dec(substr($key, 33), 256),
+                    bchmath_Utils::base2dec(substr($key, 1, 32), 256),
+                    bchmath_Utils::base2dec(substr($key, 33), 256),
                     $order
                 );
             }
 
-            $Mx = bcmath_Utils::base2dec(substr($key, 1), 256);
+            $Mx = bchmath_Utils::base2dec(substr($key, 1), 256);
         }
         else {
             throw new ErrorException("Unknown math module");
@@ -308,7 +308,7 @@ class ElectrumHelper
                 $num = bcadd($num, bcmul($j, strval(strpos($alphabet, $input[$i]))));
             }
 
-            return bcmath_Utils::dec2base($num, 256);
+            return bchmath_Utils::dec2base($num, 256);
         }
         else {
             throw new ErrorException("Unknown math module");
@@ -320,7 +320,7 @@ class ElectrumHelper
             $hex = gmp_Utils::gmp_dec2base($int, 16);
         }
         elseif (USE_EXT === 'BCMATH') {
-            $hex = bcmath_Utils::dec2base($int, 16);
+            $hex = bchmath_Utils::dec2base($int, 16);
         }
         else {
             throw new ErrorException("Unknown math module");
@@ -354,7 +354,7 @@ class ElectrumHelper
             }
         }
         elseif (USE_EXT === 'BCMATH') {
-            $num = bcmath_Utils::base2dec($input, 256);
+            $num = bchmath_Utils::base2dec($input, 256);
             while (intval($num) >= $base) {
                 $div = bcdiv($num, $base);
                 $mod = bcmod($num, $base);
@@ -400,12 +400,12 @@ class ElectrumHelper
         }
         elseif (USE_EXT === 'BCMATH') {
             return array(
-                'p' => bcmath_Utils::bchexdec('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'),
-                'a' => bcmath_Utils::bchexdec('0x0000000000000000000000000000000000000000000000000000000000000000'),
-                'b' => bcmath_Utils::bchexdec('0x0000000000000000000000000000000000000000000000000000000000000007'),
-                'n' => bcmath_Utils::bchexdec('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141'),
-                'x' => bcmath_Utils::bchexdec("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"),
-                'y' => bcmath_Utils::bchexdec("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8")
+                'p' => bchmath_Utils::bchexdec('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F'),
+                'a' => bchmath_Utils::bchexdec('0x0000000000000000000000000000000000000000000000000000000000000000'),
+                'b' => bchmath_Utils::bchexdec('0x0000000000000000000000000000000000000000000000000000000000000007'),
+                'n' => bchmath_Utils::bchexdec('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141'),
+                'x' => bchmath_Utils::bchexdec("0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798"),
+                'y' => bchmath_Utils::bchexdec("0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8")
             );
         }
         else {

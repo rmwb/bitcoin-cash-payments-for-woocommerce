@@ -30,7 +30,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 if (!defined('MAX_BASE'))
     define('MAX_BASE', 128);
 
-class bcmath_Utils {
+class bchmath_Utils {
 
     public static function bcrand($min, $max=false) {
         if (extension_loaded('bcmath') && USE_EXT=='BCMATH') {
@@ -85,7 +85,7 @@ class bcmath_Utils {
 
     public static function bcand($x, $y) {
         if (extension_loaded('bcmath') && USE_EXT=='BCMATH') {
-            return self::_bcbitwise_internal($x, $y, 'bcmath_Utils::_bcand');
+            return self::_bcbitwise_internal($x, $y, 'bchmath_Utils::_bcand');
         } else {
             throw new ErrorException("Please install BCMATH");
         }

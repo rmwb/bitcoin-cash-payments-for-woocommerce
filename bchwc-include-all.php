@@ -47,7 +47,7 @@ if (defined('BCHWC_MUST_LOAD_WP') && !defined('WP_USE_THEMES') && !defined('ABSP
 
 
 // This loads necessary modules and selects best math library
-require_once (dirname(__FILE__) . '/libs/util/bcmath_Utils.php');
+require_once (dirname(__FILE__) . '/libs/util/bchmath_Utils.php');
 require_once (dirname(__FILE__) . '/libs/util/gmp_Utils.php');
 require_once (dirname(__FILE__) . '/libs/CurveFp.php');
 require_once (dirname(__FILE__) . '/libs/Point.php');

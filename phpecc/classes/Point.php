@@ -260,10 +260,10 @@ class Point implements PointInterface {
                     while (bccomp($i, 1) == 1) {
                         $result = self::double($result);
 
-                        if (bccomp(bcmath_Utils::bcand($e3, $i), '0') != 0 && bccomp(bcmath_Utils::bcand($e, $i), '0') == 0) {
+                        if (bccomp(bchmath_Utils::bcand($e3, $i), '0') != 0 && bccomp(bchmath_Utils::bcand($e, $i), '0') == 0) {
                             $result = self::add($result, $p1);
                         }
-                        if (bccomp(bcmath_Utils::bcand($e3, $i), 0) == 0 && bccomp(bcmath_Utils::bcand($e, $i), 0) != 0) {
+                        if (bccomp(bchmath_Utils::bcand($e3, $i), 0) == 0 && bccomp(bchmath_Utils::bcand($e, $i), 0) != 0) {
                             $result = self::add($result, $negative_self);
                         }
 

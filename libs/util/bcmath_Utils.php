@@ -30,7 +30,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 if (!defined('MAX_BASE'))
     define('MAX_BASE', 128);
 
-class bcmath_Utils
+class bchmath_Utils
 {
     public static function bchexdec($hex) {
         if (extension_loaded('bcmath') && USE_EXT=='BCMATH') {

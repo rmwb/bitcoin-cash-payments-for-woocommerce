@@ -754,7 +754,7 @@ class NumberTheory {
 
             for ($i = 0; $i < $t; $i++) {
 
-                $a = bcmath_Utils::bcrand(1, bcsub($n, 1));
+                $a = bchmath_Utils::bcrand(1, bcsub($n, 1));
 
                 $b0 = self::modular_exp($a, $m, $n);
 
@@ -798,7 +798,7 @@ class NumberTheory {
                 return 2;
 
 
-            $result = bcmath_Utils::bcor(bcadd($starting_value, 1), 1);
+            $result = bchmath_Utils::bcor(bcadd($starting_value, 1), 1);
             while (!self::is_prime($result)) {
                 $result = bcadd($result, 2);
             }

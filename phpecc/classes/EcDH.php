@@ -63,7 +63,7 @@ class EcDH implements EcDHInterface {
             //alice selects a random number between 1 and the order of the generator point(private)
             $n = $this->generator->getOrder();
 
-            $this->secret = bcmath_Utils::bcrand($n);
+            $this->secret = bchmath_Utils::bcrand($n);
 
             //Alice computes da * generator Qa is public, da is private
             $this->pubPoint = Point::mul($this->secret, $this->generator);
