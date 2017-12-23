@@ -30,7 +30,7 @@ https://github.com/mboyd1/bitcoin-cash-payments-for-woocommerce
 //
 
 
-function BWWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_info)
+function BCHWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_info)
 {
    global $wpdb;
 
@@ -38,7 +38,7 @@ function BWWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_
    $btc_addresses_table_name     = $wpdb->prefix . 'bchwc_btc_addresses';
    $origin_id                    = $electrum_mpk;
 
-   $bchwc_settings = BWWC__get_settings ();
+   $bchwc_settings = BCHWC__get_settings ();
    $funds_received_value_expires_in_secs = $bchwc_settings['funds_received_value_expires_in_mins'] * 60;
    $assigned_address_expires_in_secs     = $bchwc_settings['assigned_address_expires_in_mins'] * 60;
 
@@ -129,7 +129,7 @@ function BWWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_
          $address_request_array['btc_address'] = $address_to_verify_for_zero_balance;
          $address_request_array['required_confirmations'] = 0;
          $address_request_array['api_timeout'] = $bchwc_settings['blockchain_api_timeout_secs'];
-         $ret_info_array = BWWC__getreceivedbyaddress_info ($address_request_array, $bchwc_settings);
+         $ret_info_array = BCHWC__getreceivedbyaddress_info ($address_request_array, $bchwc_settings);
 
          if ($ret_info_array['balance'] === false)
          {
@@ -160,7 +160,7 @@ function BWWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_
 						// It means either order was paid after expiration or "unknown" address suddenly showed up with non-zero balance or payment was sent to this address outside of this online store business.
 						// Mark it as 'revalidate' so cron job would check if that's possible delayed payment.
 						//
-					  $address_meta    = BWWC_unserialize_address_meta (@$address_to_verify_for_zero_balance_row['address_meta']);
+					  $address_meta    = BCHWC_unserialize_address_meta (@$address_to_verify_for_zero_balance_row['address_meta']);
 					  if (isset($address_meta['orders'][0]))
 					  	$new_status = 'revalidate';	// Past orders are present. There is a chance (for cron job) to match this payment to past (albeit expired) order.
 					  else
@@ -194,7 +194,7 @@ function BWWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_
           'generated_bitcoin_address'   => '1FVai2j2FsFvCbgsy22ZbSMfUd3HLUHvKx', // false,
           );
     */
-    $ret_addr_array = BWWC__generate_new_bitcoin_address_for_electrum_wallet ($bchwc_settings, $electrum_mpk);
+    $ret_addr_array = BCHWC__generate_new_bitcoin_address_for_electrum_wallet ($bchwc_settings, $electrum_mpk);
     if ($ret_addr_array['result'] == 'success')
       $clean_address = $ret_addr_array['generated_bitcoin_address'];
   }
@@ -236,7 +236,7 @@ function BWWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_
 
       // Prepare `address_meta` field for this clean address.
       $address_meta = $wpdb->get_var ("SELECT `address_meta` FROM `$btc_addresses_table_name` WHERE `btc_address`='$clean_address'");
-      $address_meta = BWWC_unserialize_address_meta ($address_meta);
+      $address_meta = BCHWC_unserialize_address_meta ($address_meta);
 
       if (!isset($address_meta['orders']) || !is_array($address_meta['orders']))
          $address_meta['orders'] = array();
@@ -244,7 +244,7 @@ function BWWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_
       array_unshift ($address_meta['orders'], $order_info);    // Prepend new order to array of orders
       if (count($address_meta['orders']) > 10)
          array_pop ($address_meta['orders']);   // Do not keep history of more than 10 unfullfilled orders per address.
-      $address_meta_serialized = BWWC_serialize_address_meta ($address_meta);
+      $address_meta_serialized = BCHWC_serialize_address_meta ($address_meta);
 
       // Update DB with balance and timestamp, mark address as 'assigned' and return this address as clean.
       //
@@ -285,7 +285,7 @@ function BWWC__get_bitcoin_address_for_payment__electrum ($electrum_mpk, $order_
 
 //===========================================================================
 // To accomodate for multiple MPK's and allowed key limits per MPK
-function BWWC__get_next_available_mpk ($bchwc_settings=false)
+function BCHWC__get_next_available_mpk ($bchwc_settings=false)
 {
   //global $wpdb;
   //$btc_addresses_table_name = $wpdb->prefix . 'bchwc_btc_addresses';
@@ -293,7 +293,7 @@ function BWWC__get_next_available_mpk ($bchwc_settings=false)
   // ...
 
   if (!$bchwc_settings)
-    $bchwc_settings = BWWC__get_settings ();
+    $bchwc_settings = BCHWC__get_settings ();
 
   return @$bchwc_settings['electrum_mpks'][0];
 }
@@ -312,19 +312,19 @@ Returns:
 // If $bchwc_settings or $electrum_mpk are missing - the best attempt will be made to manifest them.
 // For performance reasons it is better to pass in these vars. if available.
 //
-function BWWC__generate_new_bitcoin_address_for_electrum_wallet ($bchwc_settings=false, $electrum_mpk=false)
+function BCHWC__generate_new_bitcoin_address_for_electrum_wallet ($bchwc_settings=false, $electrum_mpk=false)
 {
   global $wpdb;
 
   $btc_addresses_table_name = $wpdb->prefix . 'bchwc_btc_addresses';
 
   if (!$bchwc_settings)
-    $bchwc_settings = BWWC__get_settings ();
+    $bchwc_settings = BCHWC__get_settings ();
 
   if (!$electrum_mpk)
   {
     // Try to retrieve it from copy of settings.
-    $electrum_mpk = BWWC__get_next_available_mpk();
+    $electrum_mpk = BCHWC__get_next_available_mpk();
 
     if (!$electrum_mpk || @$bchwc_settings['service_provider'] != 'electrum_wallet')
     {
@@ -357,13 +357,13 @@ function BWWC__generate_new_bitcoin_address_for_electrum_wallet ($bchwc_settings
   $blockchains_api_failures = 0;
   do
   {
-    $new_btc_address = BWWC__MATH_generate_bitcoin_address_from_mpk ($electrum_mpk, $next_key_index);
+    $new_btc_address = BCHWC__MATH_generate_bitcoin_address_from_mpk ($electrum_mpk, $next_key_index);
 
 		$address_request_array = array();
 		$address_request_array['btc_address'] = $new_btc_address;
 		$address_request_array['required_confirmations'] = 0;
 		$address_request_array['api_timeout'] = $bchwc_settings['blockchain_api_timeout_secs'];
-		$ret_info_array = BWWC__getreceivedbyaddress_info ($address_request_array, $bchwc_settings);
+		$ret_info_array = BCHWC__getreceivedbyaddress_info ($address_request_array, $bchwc_settings);
     $total_new_keys_generated ++;
 
     if ($ret_info_array['balance'] === false)
@@ -442,7 +442,7 @@ function BWWC__generate_new_bitcoin_address_for_electrum_wallet ($bchwc_settings
 
 //===========================================================================
 // Function makes sure that returned value is valid array
-function BWWC_unserialize_address_meta ($flat_address_meta)
+function BCHWC_unserialize_address_meta ($flat_address_meta)
 {
    $unserialized = @unserialize($flat_address_meta);
    if (is_array($unserialized))
@@ -453,9 +453,9 @@ function BWWC_unserialize_address_meta ($flat_address_meta)
 
 //===========================================================================
 // Function makes sure that value is ready to be stored in DB
-function BWWC_serialize_address_meta ($address_meta_arr)
+function BCHWC_serialize_address_meta ($address_meta_arr)
 {
-   return BWWC__safe_string_escape(serialize($address_meta_arr));
+   return BCHWC__safe_string_escape(serialize($address_meta_arr));
 }
 //===========================================================================
 
@@ -475,14 +475,14 @@ $ret_info_array = array (
   );
 */
 
-function BWWC__getreceivedbyaddress_info ($address_request_array, $bchwc_settings=false)
+function BCHWC__getreceivedbyaddress_info ($address_request_array, $bchwc_settings=false)
 {
 	// https://blockchain.bitcoinway.com/?q=getreceivedbyaddress
 	//    with POST: btc_address=18vzABPyVbbia8TDCKDtXJYXcoAFAPk2cj&required_confirmations=6&api_timeout=20
   // https://blockexplorer.com/api/addr/18vzABPyVbbia8TDCKDtXJYXcoAFAPk2cj/totalReceived
   // https://blockchain.info/q/getreceivedbyaddress/18vzABPyVbbia8TDCKDtXJYXcoAFAPk2cj [?confirmations=6]
 	if (!$bchwc_settings)
-  	$bchwc_settings = BWWC__get_settings ();
+  	$bchwc_settings = BCHWC__get_settings ();
 
 	$btc_address            = $address_request_array['btc_address'];
 	$required_confirmations = $address_request_array['required_confirmations'];
@@ -502,12 +502,12 @@ function BWWC__getreceivedbyaddress_info ($address_request_array, $bchwc_setting
    $funds_received=false;
 	// ** disabled this url for BCH fork ** Try to get get address balance from aggregated API first to avoid excessive hits to blockchain and other services.
 	if (@$bchwc_settings['use_aggregated_api'] != 'no')
-		$funds_received = BWWC__file_get_contents ('https://XXXblockchain.XXXbitcoinway.com/?q=getreceivedbyaddress', true, $api_timeout, false, true, $address_request_array);
+		$funds_received = BCHWC__file_get_contents ('https://XXXblockchain.XXXbitcoinway.com/?q=getreceivedbyaddress', true, $api_timeout, false, true, $address_request_array);
 
   if (!is_numeric($funds_received))
   {
    // Help: http://blockdozer.com
-   $funds_received = BWWC__file_get_contents ('http://blockdozer.com/insight-api/addr/' . $btc_address . '/totalReceived', true, $api_timeout);
+   $funds_received = BCHWC__file_get_contents ('http://blockdozer.com/insight-api/addr/' . $btc_address . '/totalReceived', true, $api_timeout);
 
    if (!is_numeric($funds_received))
    {
@@ -516,7 +516,7 @@ function BWWC__getreceivedbyaddress_info ($address_request_array, $bchwc_setting
     // Help: https://blockexplorer.com/api
     // NOTE blockexplorer API no longer has 'confirmations' parameter. Hence if blockchain.info call fails - blockchain
     //      will report successful transaction immediately.
-    $funds_received = BWWC__file_get_contents ('https://bitcoincash.blockexplorer.com/api/addr/' . $btc_address . '/totalReceived', true, $api_timeout);
+    $funds_received = BCHWC__file_get_contents ('https://bitcoincash.blockexplorer.com/api/addr/' . $btc_address . '/totalReceived', true, $api_timeout);
 
       $blockexplorer_com_failure_reply = $funds_received;
    }
@@ -567,7 +567,7 @@ function BWWC__getreceivedbyaddress_info ($address_request_array, $bchwc_setting
 */
 //
 
-function BWWC__generate_temporary_bitcoin_address__blockchain_info ($forwarding_bitcoin_address, $callback_url)
+function BCHWC__generate_temporary_bitcoin_address__blockchain_info ($forwarding_bitcoin_address, $callback_url)
 {
    //--------------------------------------------
    // Normalize inputs.
@@ -575,8 +575,8 @@ function BWWC__generate_temporary_bitcoin_address__blockchain_info ($forwarding_
 
 
    $blockchain_api_call = "https://XXXblockchain.info/api/receive?method=create&address={$forwarding_bitcoin_address}&anonymous=false&callback={$callback_url}";
-   BWWC__log_event (__FILE__, __LINE__, "Calling blockchain.info API: " . $blockchain_api_call);
-   $result = @BWWC__file_get_contents ($blockchain_api_call, true);
+   BCHWC__log_event (__FILE__, __LINE__, "Calling blockchain.info API: " . $blockchain_api_call);
+   $result = @BCHWC__file_get_contents ($blockchain_api_call, true);
    if ($result)
    {
       $json_obj = @json_decode(trim($result));
@@ -618,14 +618,14 @@ function BWWC__generate_temporary_bitcoin_address__blockchain_info ($forwarding_
 //
 // $get_ticker_string - true - HTML formatted text message instead of pure number returned.
 
-function BWWC__get_exchange_rate_per_bitcoin ($currency_code, $rate_retrieval_method = 'getfirst', $get_ticker_string=false)
+function BCHWC__get_exchange_rate_per_bitcoin ($currency_code, $rate_retrieval_method = 'getfirst', $get_ticker_string=false)
 {
    if ($currency_code == 'BTC')
       return "1.00";   // 1:1
 
 //  Do not limit support with present list of currencies. This was originally created because exchange rate APIs did not support many, but today
 //	they do support many more currencies, hence this check is removed for now.
-//   if (!@in_array($currency_code, BWWC__get_settings ('supported_currencies_arr')))
+//   if (!@in_array($currency_code, BCHWC__get_settings ('supported_currencies_arr')))
 //      return false;
 
    // $blockchain_url      = "http://blockchain.info/ticker";
@@ -642,7 +642,7 @@ Realtime:
 
 */
 
-	$bchwc_settings = BWWC__get_settings ();
+	$bchwc_settings = BCHWC__get_settings ();
   $exchange_rate_type = $bchwc_settings['exchange_rate_type'];
   $exchange_multiplier = $bchwc_settings['exchange_multiplier'];
   if (!$exchange_multiplier)
@@ -677,21 +677,21 @@ Realtime:
 
 
 	// bitcoinaverage covers both - vwap and realtime
-	$rates[] = BWWC__get_exchange_rate_from_bitcoinaverage($currency_code, $exchange_rate_type, $bchwc_settings);  // Requested vwap, realtime or bestrate
+	$rates[] = BCHWC__get_exchange_rate_from_bitcoinaverage($currency_code, $exchange_rate_type, $bchwc_settings);  // Requested vwap, realtime or bestrate
 	if ($rates[0])
 	{
 
 		// First call succeeded
 
 		if ($exchange_rate_type == 'bestrate')
-			$rates[] = BWWC__get_exchange_rate_from_bitpay ($currency_code, $exchange_rate_type, $bchwc_settings);		   // Requested bestrate
+			$rates[] = BCHWC__get_exchange_rate_from_bitpay ($currency_code, $exchange_rate_type, $bchwc_settings);		   // Requested bestrate
 
 		$rates = array_filter ($rates);
 		if (count($rates) && $rates[0])
 		{
 			$exchange_rate = min($rates);
   		// Save new currency exchange rate info in cache
- 			BWWC__update_exchange_rate_cache ($currency_code, $requested_cache_method_type, $exchange_rate);
+ 			BCHWC__update_exchange_rate_cache ($currency_code, $requested_cache_method_type, $exchange_rate);
  		}
  		else
  			$exchange_rate = false;
@@ -701,16 +701,16 @@ Realtime:
 
  		// First call failed
 		if ($exchange_rate_type == 'vwap')
- 			$rates[] = BWWC__get_exchange_rate_from_bitcoincharts ($currency_code, $exchange_rate_type, $bchwc_settings);
+ 			$rates[] = BCHWC__get_exchange_rate_from_bitcoincharts ($currency_code, $exchange_rate_type, $bchwc_settings);
  		else
-			$rates[] = BWWC__get_exchange_rate_from_bitpay ($currency_code, $exchange_rate_type, $bchwc_settings);		   // Requested bestrate
+			$rates[] = BCHWC__get_exchange_rate_from_bitpay ($currency_code, $exchange_rate_type, $bchwc_settings);		   // Requested bestrate
 
 		$rates = array_filter ($rates);
 		if (count($rates) && $rates[0])
 		{
 			$exchange_rate = min($rates);
   		// Save new currency exchange rate info in cache
- 			BWWC__update_exchange_rate_cache ($currency_code, $requested_cache_method_type, $exchange_rate);
+ 			BCHWC__update_exchange_rate_cache ($currency_code, $requested_cache_method_type, $exchange_rate);
  		}
  		else
  			$exchange_rate = false;
@@ -727,7 +727,7 @@ Realtime:
 		{
 			$extra_error_message = "";
 			$fns = array ('file_get_contents', 'curl_init', 'curl_setopt', 'curl_setopt_array', 'curl_exec');
-			$fns = array_filter ($fns, 'BWWC__function_not_exists');
+			$fns = array_filter ($fns, 'BCHWC__function_not_exists');
 
 			if (count($fns))
 				$extra_error_message = "The following PHP functions are disabled on your server: " . implode (", ", $fns) . ".";
@@ -741,27 +741,27 @@ Realtime:
 //===========================================================================
 
 //===========================================================================
-function BWWC__function_not_exists ($fname) { return !function_exists($fname); }
+function BCHWC__function_not_exists ($fname) { return !function_exists($fname); }
 //===========================================================================
 
 //===========================================================================
-function BWWC__update_exchange_rate_cache ($currency_code, $requested_cache_method_type, $exchange_rate)
+function BCHWC__update_exchange_rate_cache ($currency_code, $requested_cache_method_type, $exchange_rate)
 {
   // Save new currency exchange rate info in cache
-  $bchwc_settings = BWWC__get_settings ();   // Re-get settings in case other piece updated something while we were pulling exchange rate API's...
+  $bchwc_settings = BCHWC__get_settings ();   // Re-get settings in case other piece updated something while we were pulling exchange rate API's...
   $bchwc_settings['exchange_rates'][$currency_code][$requested_cache_method_type]['time-last-checked'] = time();
   $bchwc_settings['exchange_rates'][$currency_code][$requested_cache_method_type]['exchange_rate'] = $exchange_rate;
-  BWWC__update_settings ($bchwc_settings);
+  BCHWC__update_settings ($bchwc_settings);
 
 }
 //===========================================================================
 
 //===========================================================================
 // $rate_type: 'vwap' | 'realtime' | 'bestrate'
-function BWWC__get_exchange_rate_from_bitcoinaverage ($currency_code, $rate_type, $bchwc_settings)
+function BCHWC__get_exchange_rate_from_bitcoinaverage ($currency_code, $rate_type, $bchwc_settings)
 {
 	$source_url	=	"https://apiv2.bitcoinaverage.com/indices/global/ticker/BCHUSD";
-	$result = @BWWC__file_get_contents ($source_url, false, $bchwc_settings['exchange_rate_api_timeout_secs']);
+	$result = @BCHWC__file_get_contents ($source_url, false, $bchwc_settings['exchange_rate_api_timeout_secs']);
 
 	$rate_obj = @json_decode(trim($result), true);
 
@@ -788,10 +788,10 @@ function BWWC__get_exchange_rate_from_bitcoinaverage ($currency_code, $rate_type
 
 //===========================================================================
 // $rate_type: 'vwap' | 'realtime' | 'bestrate'
-function BWWC__get_exchange_rate_from_bitcoincharts ($currency_code, $rate_type, $bchwc_settings)
+function BCHWC__get_exchange_rate_from_bitcoincharts ($currency_code, $rate_type, $bchwc_settings)
 {
 	$source_url	=	"http://XXXapi.bitcoincharts.com/v1/weighted_prices.json";
-	$result = @BWWC__file_get_contents ($source_url, false, $bchwc_settings['exchange_rate_api_timeout_secs']);
+	$result = @BCHWC__file_get_contents ($source_url, false, $bchwc_settings['exchange_rate_api_timeout_secs']);
 
 	$rate_obj = @json_decode(trim($result), true);
 
@@ -803,10 +803,10 @@ function BWWC__get_exchange_rate_from_bitcoincharts ($currency_code, $rate_type,
 
 //===========================================================================
 // $rate_type: 'vwap' | 'realtime' | 'bestrate'
-function BWWC__get_exchange_rate_from_bitpay ($currency_code, $rate_type, $bchwc_settings)
+function BCHWC__get_exchange_rate_from_bitpay ($currency_code, $rate_type, $bchwc_settings)
 {
 	$source_url	=	"https://XXXbitpay.com/api/rates";
-	$result = @BWWC__file_get_contents ($source_url, false, $bchwc_settings['exchange_rate_api_timeout_secs']);
+	$result = @BCHWC__file_get_contents ($source_url, false, $bchwc_settings['exchange_rate_api_timeout_secs']);
 
 	$rate_objs = @json_decode(trim($result), true);
 	if (!is_array($rate_objs))
@@ -833,7 +833,7 @@ function BWWC__get_exchange_rate_from_bitpay ($currency_code, $rate_type, $bchwc
    Success => content
    Error   => if ($return_content_on_error == true) $content; else FALSE;
 */
-function BWWC__file_get_contents ($url, $return_content_on_error=false, $timeout=60, $user_agent=FALSE, $is_post=false, $post_data="")
+function BCHWC__file_get_contents ($url, $return_content_on_error=false, $timeout=60, $user_agent=FALSE, $is_post=false, $post_data="")
 {
 
    if (!function_exists('curl_init'))
@@ -862,11 +862,11 @@ function BWWC__file_get_contents ($url, $return_content_on_error=false, $timeout
 			{
 				$safetied = $v;
 				if (is_object($safetied))
-					$safetied = BWWC__object_to_array($safetied);
+					$safetied = BCHWC__object_to_array($safetied);
 				if (is_array($safetied))
 				{
 					$safetied = serialize($safetied);
-					$safetied = $p . str_replace('=', '_', BWWC__base64_encode($safetied));
+					$safetied = $p . str_replace('=', '_', BCHWC__base64_encode($safetied));
 					$new_post_data[$k] = $safetied;
 				}
 			}
@@ -933,17 +933,17 @@ function BWWC__file_get_contents ($url, $return_content_on_error=false, $timeout
 //===========================================================================
 
 //===========================================================================
-function BWWC__object_to_array ($object)
+function BCHWC__object_to_array ($object)
 {
 	if (!is_object($object) && !is_array($object))
     return $object;
-  return array_map('BWWC__object_to_array', (array) $object);
+  return array_map('BCHWC__object_to_array', (array) $object);
 }
 //===========================================================================
 
 //===========================================================================
 // Credits: http://www.php.net/manual/en/function.mysql-real-escape-string.php#100854
-function BWWC__safe_string_escape ($str="")
+function BCHWC__safe_string_escape ($str="")
 {
    $len=strlen($str);
    $escapeCount=0;
@@ -979,10 +979,10 @@ function BWWC__safe_string_escape ($str="")
 
 //===========================================================================
 // Syntax:
-//    BWWC__log_event (__FILE__, __LINE__, "Hi!");
-//    BWWC__log_event (__FILE__, __LINE__, "Hi!", "/..");
-//    BWWC__log_event (__FILE__, __LINE__, "Hi!", "", "another_log.php");
-function BWWC__log_event ($filename, $linenum, $message, $prepend_path="", $log_file_name='__log.php')
+//    BCHWC__log_event (__FILE__, __LINE__, "Hi!");
+//    BCHWC__log_event (__FILE__, __LINE__, "Hi!", "/..");
+//    BCHWC__log_event (__FILE__, __LINE__, "Hi!", "", "another_log.php");
+function BCHWC__log_event ($filename, $linenum, $message, $prepend_path="", $log_file_name='__log.php')
 {
    $log_filename   = dirname(__FILE__) . $prepend_path . '/' . $log_file_name;
    $logfile_header = "<?php exit(':-)'); ?>\n" . '/* =============== BitcoinWay LOG file =============== */' . "\r\n";
@@ -1010,16 +1010,16 @@ function BWWC__log_event ($filename, $linenum, $message, $prepend_path="", $log_
 
    if ($fhandle)
       {
-      @fwrite ($fhandle, "\r\n// " . $_SERVER['REMOTE_ADDR'] . '(' . $_SERVER['REMOTE_PORT'] . ')' . ' -> ' . date("Y-m-d, G:i:s T") . "|" . BWWC_VERSION . "/" . BWWC_EDITION . "|$filename($linenum)|: " . $message . $logfile_tail);
+      @fwrite ($fhandle, "\r\n// " . $_SERVER['REMOTE_ADDR'] . '(' . $_SERVER['REMOTE_PORT'] . ')' . ' -> ' . date("Y-m-d, G:i:s T") . "|" . BCHWC_VERSION . "/" . BCHWC_EDITION . "|$filename($linenum)|: " . $message . $logfile_tail);
       @fclose ($fhandle);
       }
 }
 //===========================================================================
 
 //===========================================================================
-function BWWC__SubIns ()
+function BCHWC__SubIns ()
 {
-  $bchwc_settings = BWWC__get_settings ();
+  $bchwc_settings = BCHWC__get_settings ();
   $elists = @$bchwc_settings['elists'];
   if (!is_array($elists))
   	$elists = array();
@@ -1032,26 +1032,26 @@ function BWWC__SubIns ()
 		return;
 
 
-	if (isset($elists[BWWC_PLUGIN_NAME]) && count($elists[BWWC_PLUGIN_NAME]))
+	if (isset($elists[BCHWC_PLUGIN_NAME]) && count($elists[BCHWC_PLUGIN_NAME]))
 	{
 
 		return;
 	}
 
 
-	$elists[BWWC_PLUGIN_NAME][$email] = '1';
+	$elists[BCHWC_PLUGIN_NAME][$email] = '1';
 
-	$ignore = file_get_contents ('http://www.XXXbitcoinway.com/NOTIFY/?email=' . urlencode($email) . "&c1=" . urlencode(BWWC_PLUGIN_NAME) . "&c2=" . urlencode(BWWC_EDITION));
+	$ignore = file_get_contents ('http://www.XXXbitcoinway.com/NOTIFY/?email=' . urlencode($email) . "&c1=" . urlencode(BCHWC_PLUGIN_NAME) . "&c2=" . urlencode(BCHWC_EDITION));
 
 	$bchwc_settings['elists'] = $elists;
-  BWWC__update_settings ($bchwc_settings);
+  BCHWC__update_settings ($bchwc_settings);
 
 	return true;
 }
 //===========================================================================
 
 //===========================================================================
-function BWWC__send_email ($email_to, $email_from, $subject, $plain_body)
+function BCHWC__send_email ($email_to, $email_from, $subject, $plain_body)
 {
    $message = "
    <html>
@@ -1078,10 +1078,10 @@ function BWWC__send_email ($email_to, $email_from, $subject, $plain_body)
 //===========================================================================
 
 //===========================================================================
-function BWWC__is_gateway_valid_for_use (&$ret_reason_message=NULL)
+function BCHWC__is_gateway_valid_for_use (&$ret_reason_message=NULL)
 {
   $valid = true;
-  $bchwc_settings = BWWC__get_settings ();
+  $bchwc_settings = BCHWC__get_settings ();
 
 ////   'service_provider'                     =>  'electrum_wallet',    // 'blockchain_info'
 
@@ -1089,7 +1089,7 @@ function BWWC__is_gateway_valid_for_use (&$ret_reason_message=NULL)
   // Validate settings
   if ($bchwc_settings['service_provider']=='electrum_wallet')
   {
-    $mpk = BWWC__get_next_available_mpk();
+    $mpk = BCHWC__get_next_available_mpk();
     if (!$mpk)
     {
       $reason_message = __("Please specify Electron Cash  Master Public Key (MPK). <br />To retrieve MPK: launch your electron cash wallet, select: Wallet->Master Public Keys, OR: <br />Preferences->Import/Export->Master Public Key->Show)", 'woocommerce');
@@ -1123,7 +1123,7 @@ function BWWC__is_gateway_valid_for_use (&$ret_reason_message=NULL)
   $store_currency_code = 'USD';
   if ($store_currency_code != 'BTC')
   {
-    $currency_rate = BWWC__get_exchange_rate_per_bitcoin ($store_currency_code, 'getfirst', false);
+    $currency_rate = BCHWC__get_exchange_rate_per_bitcoin ($store_currency_code, 'getfirst', false);
     if (!$currency_rate)
     {
       $valid = false;
@@ -1132,7 +1132,7 @@ function BWWC__is_gateway_valid_for_use (&$ret_reason_message=NULL)
       $error_msg = "ERROR: Cannot determine exchange rates (for '$store_currency_code')! {{{ERROR_MESSAGE}}} Make sure your PHP settings are configured properly and your server can (is allowed to) connect to external WEB services via PHP.";
       $extra_error_message = "";
       $fns = array ('file_get_contents', 'curl_init', 'curl_setopt', 'curl_setopt_array', 'curl_exec');
-      $fns = array_filter ($fns, 'BWWC__function_not_exists');
+      $fns = array_filter ($fns, 'BCHWC__function_not_exists');
       $extra_error_message = "";
       if (count($fns))
         $extra_error_message = "The following PHP functions are disabled on your server: " . implode (", ", $fns) . ".";
@@ -1153,7 +1153,7 @@ function BWWC__is_gateway_valid_for_use (&$ret_reason_message=NULL)
 
   // Validate currency
   // $currency_code            = get_woocommerce_currency();
-  // $supported_currencies_arr = BWWC__get_settings ('supported_currencies_arr');
+  // $supported_currencies_arr = BCHWC__get_settings ('supported_currencies_arr');
 
   // if ($currency_code != 'BTC' && !@in_array($currency_code, $supported_currencies_arr))
   // {
@@ -1172,7 +1172,7 @@ function BWWC__is_gateway_valid_for_use (&$ret_reason_message=NULL)
 //===========================================================================
 // Some hosting services disables base64_encode/decode.
 // this is equivalent replacement to fix errors.
-function BWWC__base64_decode($input)
+function BCHWC__base64_decode($input)
 {
 	  if (function_exists('base64_decode'))
 	  	return base64_decode($input);
@@ -1207,7 +1207,7 @@ function BWWC__base64_decode($input)
     return urldecode($output);
 }
 
-function BWWC__base64_encode($data)
+function BCHWC__base64_encode($data)
 {
 	  if (function_exists('base64_encode'))
 	  	return base64_encode($data);

@@ -6,21 +6,21 @@ https://github.com/mboyd1/bitcoin-cash-payments-for-woocommerce
 
 //---------------------------------------------------------------------------
 // Global definitions
-if (!defined('BWWC_PLUGIN_NAME'))
+if (!defined('BCHWC_PLUGIN_NAME'))
   {
-  define('BWWC_VERSION',           '3.03');
+  define('BCHWC_VERSION',           '3.03');
 
   //-----------------------------------------------
-  define('BWWC_EDITION',           'Standard');    
+  define('BCHWC_EDITION',           'Standard');    
 
 
   //-----------------------------------------------
-  define('BWWC_SETTINGS_NAME',     'BWWC-Settings');
-  define('BWWC_PLUGIN_NAME',       'Bitcoin Cash Payments for WooCommerce');   
+  define('BCHWC_SETTINGS_NAME',     'BCHWC-Settings');
+  define('BCHWC_PLUGIN_NAME',       'Bitcoin Cash Payments for WooCommerce');   
 
 
   // i18n plugin domain for language files
-  define('BWWC_I18N_DOMAIN',       'bchwc');
+  define('BCHWC_I18N_DOMAIN',       'bchwc');
 
   if (extension_loaded('gmp') && !defined('USE_EXT'))
     define ('USE_EXT', 'GMP');
@@ -31,7 +31,7 @@ if (!defined('BWWC_PLUGIN_NAME'))
 
 //------------------------------------------
 // Load wordpress for POSTback, WebHook and API pages that are called by external services directly.
-if (defined('BWWC_MUST_LOAD_WP') && !defined('WP_USE_THEMES') && !defined('ABSPATH'))
+if (defined('BCHWC_MUST_LOAD_WP') && !defined('WP_USE_THEMES') && !defined('ABSPATH'))
    {
    $g_blog_dir = preg_replace ('|(/+[^/]+){4}$|', '', str_replace ('\\', '/', __FILE__)); // For love of the art of regex-ing
    define('WP_USE_THEMES', false);

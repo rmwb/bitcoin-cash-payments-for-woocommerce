@@ -8,18 +8,18 @@ https://github.com/mboyd1/bitcoin-cash-payments-for-woocommerce
 include (dirname(__FILE__) . '/bchwc-include-all.php');
 
 //===========================================================================
-function BWWC__render_general_settings_page ()   { BWWC__render_settings_page   ('general'); }
-function BWWC__render_advanced_settings_page ()  { BWWC__render_settings_page   ('advanced'); }
+function BCHWC__render_general_settings_page ()   { BCHWC__render_settings_page   ('general'); }
+function BCHWC__render_advanced_settings_page ()  { BCHWC__render_settings_page   ('advanced'); }
 //===========================================================================
 
 //===========================================================================
-function BWWC__render_settings_page ($menu_page_name)
+function BCHWC__render_settings_page ($menu_page_name)
 {
-   $bchwc_settings = BWWC__get_settings ();
+   $bchwc_settings = BCHWC__get_settings ();
 
    if (isset ($_POST['button_update_bchwc_settings']))
       {
-      BWWC__update_settings ("", false);
+      BCHWC__update_settings ("", false);
 echo <<<HHHH
 <div align="center" style="background-color:#FFFFE0;padding:5px;font-size:120%;border: 1px solid #E6DB55;margin:5px;border-radius:3px;">
 Settings updated!
@@ -28,7 +28,7 @@ HHHH;
       }
    else if (isset($_POST['button_reset_bchwc_settings']))
       {
-      BWWC__reset_all_settings (false);
+      BCHWC__reset_all_settings (false);
 echo <<<HHHH
 <div align="center" style="background-color:#FFFFE0;padding:5px;font-size:120%;border: 1px solid #E6DB55;margin:5px;border-radius:3px;">
 All settings reverted to all defaults
@@ -37,7 +37,7 @@ HHHH;
       }
    else if (isset($_POST['button_reset_partial_bchwc_settings']))
       {
-      BWWC__reset_partial_settings (false);
+      BCHWC__reset_partial_settings (false);
 echo <<<HHHH
 <div align="center" style="background-color:#FFFFE0;padding:5px;font-size:120%;border: 1px solid #E6DB55;margin:5px;border-radius:3px;">
 Settings on this page reverted to defaults
@@ -46,12 +46,12 @@ HHHH;
       }
    else if (isset($_POST['validate_bchwc-license']))
       {
-      BWWC__update_settings ("", false);
+      BCHWC__update_settings ("", false);
       }
 
    // Output full admin settings HTML
   $gateway_status_message = "";
-  $gateway_valid_for_use = BWWC__is_gateway_valid_for_use($gateway_status_message);
+  $gateway_valid_for_use = BCHWC__is_gateway_valid_for_use($gateway_status_message);
   if (!$gateway_valid_for_use)
   {
     $gateway_status_message =
@@ -75,7 +75,7 @@ HHHH;
 
   $exchange_rate_message =
     '<p style="border:1px solid #DDD;padding:5px 10px;background-color:#cceeff;">' .
-    BWWC__get_exchange_rate_per_bitcoin ($currency_code, 'getfirst', true) .
+    BCHWC__get_exchange_rate_per_bitcoin ($currency_code, 'getfirst', true) .
     '</p>';
 
    echo '<div class="wrap">';
@@ -83,15 +83,15 @@ HHHH;
    switch ($menu_page_name)
       {
       case 'general'     :
-        echo  BWWC__GetPluginNameVersionEdition(true);
+        echo  BCHWC__GetPluginNameVersionEdition(true);
         echo  $gateway_status_message . $exchange_rate_message;
-        BWWC__render_general_settings_page_html();
+        BCHWC__render_general_settings_page_html();
         break;
 
       case 'advanced'    :
-        echo  BWWC__GetPluginNameVersionEdition(false);
+        echo  BCHWC__GetPluginNameVersionEdition(false);
         echo  $gateway_status_message . $exchange_rate_message;
-        BWWC__render_advanced_settings_page_html();
+        BCHWC__render_advanced_settings_page_html();
         break;
 
       default            :
@@ -103,10 +103,10 @@ HHHH;
 //===========================================================================
 
 //===========================================================================
-function BWWC__render_general_settings_page_html ()
+function BCHWC__render_general_settings_page_html ()
 {
-  $bchwc_settings = BWWC__get_settings ();
-  global $g_BWWC__cron_script_url;
+  $bchwc_settings = BCHWC__get_settings ();
+  global $g_BCHWC__cron_script_url;
 
 ?>
 
@@ -216,7 +216,7 @@ function BWWC__render_general_settings_page_html ()
 
               <select name="PRO_EDITION_ONLY" class="select">
                 <option selected="selected" disabled="disabled" value="0">No (default)</option>
-              </select> <?php echo BWWC__GetProLabel(); ?>
+              </select> <?php echo BCHWC__GetProLabel(); ?>
 
 
               <p class="description">
@@ -255,7 +255,7 @@ function BWWC__render_general_settings_page_html ()
                 <br />
                 <b>Hard Cron</b>: - Cron job driven by the website hosting system/server (usually via CPanel). <br />
                 When enabling Hard Cron job - make this script to run every 5 minutes at your hosting panel cron job scheduler:<br />
-                <?php echo '<tt style="background-color:#FFA;color:#B00;padding:0px 6px;">wget -O /dev/null ' . $g_BWWC__cron_script_url . '?hardcron=1</tt>'; ?>
+                <?php echo '<tt style="background-color:#FFA;color:#B00;padding:0px 6px;">wget -O /dev/null ' . $g_BCHWC__cron_script_url . '?hardcron=1</tt>'; ?>
                 <br /><b style="color:red;">NOTE:</b> Cron jobs <b>might not work</b> if your site is password protected with HTTP Basic auth or other methods. This will result in WooCommerce store not seeing received payments (even though funds will arrive correctly to your bitcoin cash addresses).
                 <br /><u>Note:</u> You will need to deactivate/reactivate plugin after changing this setting for it to have effect.<br />
                 "Hard" cron jobs may not be properly supported by all hosting plans (many shared hosting plans has restrictions in place).               
@@ -275,20 +275,20 @@ function BWWC__render_general_settings_page_html ()
 //===========================================================================
 
 //===========================================================================
-function BWWC__render_advanced_settings_page_html ()
+function BCHWC__render_advanced_settings_page_html ()
 {
-   $bchwc_settings = BWWC__get_settings ();
+   $bchwc_settings = BCHWC__get_settings ();
 
 
 ?>
 
 
-<p style="text-align:center;"><?php echo BWWC__GetProLabel(); ?></p>
+<p style="text-align:center;"><?php echo BCHWC__GetProLabel(); ?></p>
 <p><h3>Advanced Settings section gives you many more options to configure and optimize all aspects and functionality of your bitcoin cash store.</h3>
   Please note that the pro version of this plugin is only available to support legacy bitcoin and not bitcoin cash.  Do not purchase pro at this time if you intend to accept bitcoin cash payments.
-  <a href="<?php echo BWWC__GetProUrl(); ?>"><b>Pro version</b></a>.
+  <a href="<?php echo BCHWC__GetProUrl(); ?>"><b>Pro version</b></a>.
 </p>
-<h3 style="text-align:center;color:#090;">Get the <a href="<?php echo BWWC__GetProUrl(); ?>"><b>PRO version</b></a></h3>
+<h3 style="text-align:center;color:#090;">Get the <a href="<?php echo BCHWC__GetProUrl(); ?>"><b>PRO version</b></a></h3>
 
 
       </table>

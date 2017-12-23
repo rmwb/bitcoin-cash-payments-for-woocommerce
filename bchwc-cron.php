@@ -6,22 +6,22 @@ https://github.com/mboyd1/bitcoin-cash-payments-for-woocommerce
 
 
 // Include everything
-define('BWWC_MUST_LOAD_WP',  '1');
+define('BCHWC_MUST_LOAD_WP',  '1');
 include (dirname(__FILE__) . '/bchwc-include-all.php');
 
 // Cpanel-scheduled cron job call
 if (@$_REQUEST['hardcron']=='1')
-  BWWC_cron_job_worker (true);
+  BCHWC_cron_job_worker (true);
 
 //===========================================================================
 // '$hardcron' == true if job is ran by Cpanel's cron job.
 
-function BWWC_cron_job_worker ($hardcron=false)
+function BCHWC_cron_job_worker ($hardcron=false)
 {
   global $wpdb;
 
 
-  $bchwc_settings = BWWC__get_settings ();
+  $bchwc_settings = BCHWC__get_settings ();
 
   if (@$bchwc_settings['service_provider'] != 'electrum_wallet')
   {
@@ -72,7 +72,7 @@ function BWWC_cron_job_worker ($hardcron=false)
   		$ran_cycles++;	// To limit number of cycles per soft cron job.
 
 		  // Prepare 'address_meta' for use.
-		  $address_meta    = BWWC_unserialize_address_meta (@$row_for_balance_check['address_meta']);
+		  $address_meta    = BCHWC_unserialize_address_meta (@$row_for_balance_check['address_meta']);
 			$address_request_array = array();
 			$address_request_array['dcontext1'] = strlen(@$row_for_balance_check['address_meta']) . ":" . strlen($address_meta); // Arr test, delete it.
 			$address_request_array['address_meta'] = $address_meta;
@@ -82,7 +82,7 @@ function BWWC_cron_job_worker ($hardcron=false)
 			$address_request_array['btc_address'] = $row_for_balance_check['btc_address'];
 			$address_request_array['required_confirmations'] = $confirmations_required;
 			$address_request_array['api_timeout'] = $bchwc_settings['blockchain_api_timeout_secs'];
-		  $balance_info_array = BWWC__getreceivedbyaddress_info ($address_request_array, $bchwc_settings);
+		  $balance_info_array = BCHWC__getreceivedbyaddress_info ($address_request_array, $bchwc_settings);
 
 		  $last_order_info = @$address_request_array['address_meta']['orders'][0];
 		  $row_id          = $row_for_balance_check['id'];
@@ -137,11 +137,11 @@ function BWWC_cron_job_worker ($hardcron=false)
             }
           }
 
-          BWWC__log_event (__FILE__, __LINE__, "Cron job: NOTE: Detected non-zero balance at address: '{$row_for_balance_check['btc_address']}, order ID = '{$last_order_info['order_id']}'. Detected balance ='{$balance_info_array['balance']}'.");
+          BCHWC__log_event (__FILE__, __LINE__, "Cron job: NOTE: Detected non-zero balance at address: '{$row_for_balance_check['btc_address']}, order ID = '{$last_order_info['order_id']}'. Detected balance ='{$balance_info_array['balance']}'.");
 
           if ($balance_info_array['balance'] < $last_order_info['order_total'])
           {
-            BWWC__log_event (__FILE__, __LINE__, "Cron job: NOTE: balance at address: '{$row_for_balance_check['btc_address']}' (BTC '{$balance_info_array['balance']}') is not yet sufficient to complete it's order (order ID = '{$last_order_info['order_id']}'). Total required: '{$last_order_info['order_total']}'. Will wait for more funds to arrive...");
+            BCHWC__log_event (__FILE__, __LINE__, "Cron job: NOTE: balance at address: '{$row_for_balance_check['btc_address']}' (BTC '{$balance_info_array['balance']}') is not yet sufficient to complete it's order (order ID = '{$last_order_info['order_id']}'). Total required: '{$last_order_info['order_total']}'. Will wait for more funds to arrive...");
           }
         }
         else
@@ -177,16 +177,16 @@ function BWWC_cron_job_worker ($hardcron=false)
 		      */
 
 	        // Last order was fully paid! Complete it...
-	        BWWC__log_event (__FILE__, __LINE__, "Cron job: NOTE: Full payment for order ID '{$last_order_info['order_id']}' detected at address: '{$row_for_balance_check['btc_address']}' (BTC '{$balance_info_array['balance']}'). Total was required for this order: '{$last_order_info['order_total']}'. Processing order ...");
+	        BCHWC__log_event (__FILE__, __LINE__, "Cron job: NOTE: Full payment for order ID '{$last_order_info['order_id']}' detected at address: '{$row_for_balance_check['btc_address']}' (BTC '{$balance_info_array['balance']}'). Total was required for this order: '{$last_order_info['order_total']}'. Processing order ...");
 
 	        // Update order' meta info
 	        $address_meta['orders'][0]['paid'] = true;
 
 	        // Process and complete the order within WooCommerce (send confirmation emails, etc...)
-	        BWWC__process_payment_completed_for_order ($last_order_info['order_id'], $balance_info_array['balance']);
+	        BCHWC__process_payment_completed_for_order ($last_order_info['order_id'], $balance_info_array['balance']);
 
 	        // Update address' record
-	        $address_meta_serialized = BWWC_serialize_address_meta ($address_meta);
+	        $address_meta_serialized = BCHWC_serialize_address_meta ($address_meta);
 
 	        // Update DB - mark address as 'used'.
 	        //
@@ -201,7 +201,7 @@ function BWWC_cron_job_worker ($hardcron=false)
 	                `address_meta`='$address_meta_serialized'
 	            WHERE `id`='$row_id';";
 	        $ret_code = $wpdb->query ($query);
-	        BWWC__log_event (__FILE__, __LINE__, "Cron job: SUCCESS: Order ID '{$last_order_info['order_id']}' successfully completed.");
+	        BCHWC__log_event (__FILE__, __LINE__, "Cron job: SUCCESS: Order ID '{$last_order_info['order_id']}' successfully completed.");
 
 
 // This is not needed here. Let it process as many orders as are paid for in the same loop.
@@ -219,7 +219,7 @@ function BWWC_cron_job_worker ($hardcron=false)
 		  }
 		  else
 		  {
-		    BWWC__log_event (__FILE__, __LINE__, "Cron job: Warning: Cannot retrieve balance for address: '{$row_for_balance_check['btc_address']}: " . $balance_info_array['message']);
+		    BCHWC__log_event (__FILE__, __LINE__, "Cron job: Warning: Cannot retrieve balance for address: '{$row_for_balance_check['btc_address']}: " . $balance_info_array['message']);
 		  }
 		  //..//
 		}
@@ -234,7 +234,7 @@ function BWWC_cron_job_worker ($hardcron=false)
   // Try to retrieve mpk from copy of settings.
   if ($hardcron)
   {
-    $electrum_mpk = BWWC__get_next_available_mpk();
+    $electrum_mpk = BCHWC__get_next_available_mpk();
 
     if ($electrum_mpk && @$bchwc_settings['service_provider'] == 'electrum_wallet')
     {
@@ -269,7 +269,7 @@ function BWWC_cron_job_worker ($hardcron=false)
 
       if ($total_unused_addresses < $bchwc_settings['max_unused_addresses_buffer'])
       {
-        BWWC__generate_new_bitcoin_address_for_electrum_wallet ($bchwc_settings, $electrum_mpk);
+        BCHWC__generate_new_bitcoin_address_for_electrum_wallet ($bchwc_settings, $electrum_mpk);
       }
     }
   }

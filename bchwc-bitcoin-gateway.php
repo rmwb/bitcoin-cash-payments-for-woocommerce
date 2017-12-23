@@ -6,13 +6,13 @@ https://github.com/mboyd1/bitcoin-cash-payments-for-woocommerce
 
 
 //---------------------------------------------------------------------------
-add_action('plugins_loaded', 'BWWC__plugins_loaded__load_bitcoin_gateway', 0);
+add_action('plugins_loaded', 'BCHWC__plugins_loaded__load_bitcoin_gateway', 0);
 //---------------------------------------------------------------------------
 
 //###########################################################################
 // Hook payment gateway into WooCommerce
 
-function BWWC__plugins_loaded__load_bitcoin_gateway ()
+function BCHWC__plugins_loaded__load_bitcoin_gateway ()
 {
 
     if (!class_exists('WC_Payment_Gateway'))
@@ -25,13 +25,13 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	 *
 	 * Provides a Bitcoin Cash Payment Gateway
 	 *
-	 * @class 		BWWC_Bitcoin
+	 * @class 		BCHWC_Bitcoin
 	 * @extends		WC_Payment_Gateway
 	 * @version
 	 * @package
 	 * @author 		mboyd1
 	 */
-	class BWWC_Bitcoin extends WC_Payment_Gateway
+	class BCHWC_Bitcoin extends WC_Payment_Gateway
 	{
 		//-------------------------------------------------------------------
 	    /**
@@ -47,9 +47,9 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
       $this->has_fields 		= false;
       $this->method_title     = __( 'Bitcoin Cash', 'woocommerce' );
 
-      // Load BWWC settings.
-      $bchwc_settings = BWWC__get_settings ();
-			$this->service_provider = $bchwc_settings['service_provider']; // This need to be before $this->init_settings otherwise it generate PHP Notice: "Undefined property: BWWC_Bitcoin::$service_provider" down below.
+      // Load BCHWC settings.
+      $bchwc_settings = BCHWC__get_settings ();
+			$this->service_provider = $bchwc_settings['service_provider']; // This need to be before $this->init_settings otherwise it generate PHP Notice: "Undefined property: BCHWC_Bitcoin::$service_provider" down below.
 
 			// Load the form fields.
 			$this->init_form_fields();
@@ -72,19 +72,19 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
       else
 				add_action('woocommerce_update_options_payment_gateways', array($this, 'process_admin_options')); // hook into this action to save options in the backend
 
-	    add_action('woocommerce_thankyou_' . $this->id, array($this, 'BWWC__thankyou_page')); // hooks into the thank you page after payment
+	    add_action('woocommerce_thankyou_' . $this->id, array($this, 'BCHWC__thankyou_page')); // hooks into the thank you page after payment
 
 	    	// Customer Emails
-	    add_action('woocommerce_email_before_order_table', array($this, 'BWWC__email_instructions'), 10, 2); // hooks into the email template to show additional details
+	    add_action('woocommerce_email_before_order_table', array($this, 'BCHWC__email_instructions'), 10, 2); // hooks into the email template to show additional details
 
 			// Hook IPN callback logic
 			if (version_compare (WOOCOMMERCE_VERSION, '2.0', '<'))
-				add_action('init', array($this, 'BWWC__maybe_bitcoin_ipn_callback'));
+				add_action('init', array($this, 'BCHWC__maybe_bitcoin_ipn_callback'));
 			else
-				add_action('woocommerce_api_' . strtolower(get_class($this)), array($this,'BWWC__maybe_bitcoin_ipn_callback'));
+				add_action('woocommerce_api_' . strtolower(get_class($this)), array($this,'BCHWC__maybe_bitcoin_ipn_callback'));
 
 			// Validate currently set currency for the store. Must be among supported ones.
-			if (!BWWC__is_gateway_valid_for_use()) $this->enabled = false;
+			if (!BCHWC__is_gateway_valid_for_use()) $this->enabled = false;
 	    }
 		//-------------------------------------------------------------------
 
@@ -121,7 +121,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	    	}
 	    	else if ($this->service_provider=='electrum_wallet')
 	    	{
-          $mpk = BWWC__get_next_available_mpk();
+          $mpk = BCHWC__get_next_available_mpk();
 	    		if (!$mpk)
 	    		{
 		    		$reason_message = __("Please specify Electron Cash Master Public Key (MPK) in Bitcoinway plugin settings. <br />To retrieve MPK: launch your electron cash wallet, select: Wallet->Master Public Keys, OR: <br />Preferences->Import/Export->Master Public Key->Show", 'woocommerce');
@@ -153,7 +153,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	   		$store_currency_code = get_woocommerce_currency();
 	   		if ($store_currency_code != 'BTC')
 	   		{
-					$currency_rate = BWWC__get_exchange_rate_per_bitcoin ($store_currency_code, 'getfirst', false);
+					$currency_rate = BCHWC__get_exchange_rate_per_bitcoin ($store_currency_code, 'getfirst', false);
 					if (!$currency_rate)
 					{
 						$valid = false;
@@ -162,7 +162,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 						$error_msg = "ERROR: Cannot determine exchange rates (for '$store_currency_code')! {{{ERROR_MESSAGE}}} Make sure your PHP settings are configured properly and your server can (is allowed to) connect to external WEB services via PHP.";
 						$extra_error_message = "";
 						$fns = array ('file_get_contents', 'curl_init', 'curl_setopt', 'curl_setopt_array', 'curl_exec');
-						$fns = array_filter ($fns, 'BWWC__function_not_exists');
+						$fns = array_filter ($fns, 'BCHWC__function_not_exists');
 						$extra_error_message = "";
 						if (count($fns))
 							$extra_error_message = "The following PHP functions are disabled on your server: " . implode (", ", $fns) . ".";
@@ -183,7 +183,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 
 	    	// Validate currency
 	   		// $currency_code            = get_woocommerce_currency();
-	   		// $supported_currencies_arr = BWWC__get_settings ('supported_currencies_arr');
+	   		// $supported_currencies_arr = BCHWC__get_settings ('supported_currencies_arr');
 
 		   	// if ($currency_code != 'BTC' && !@in_array($currency_code, $supported_currencies_arr))
 		   	// {
@@ -220,7 +220,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	   		else
 	   			$currency_code = $store_currency_code;
 
-				$currency_ticker = BWWC__get_exchange_rate_per_bitcoin ($currency_code, 'getfirst', true);
+				$currency_ticker = BCHWC__get_exchange_rate_per_bitcoin ($currency_code, 'getfirst', true);
 	    	//-----------------------------------
 
 	    	//-----------------------------------
@@ -351,7 +351,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 		public function admin_options()
 		{
 			$validation_msg = "";
-			$store_valid    = BWWC__is_gateway_valid_for_use ($validation_msg);
+			$store_valid    = BCHWC__is_gateway_valid_for_use ($validation_msg);
 
 			// After defining the options, we need to display them too; thats where this next function comes into play:
 	    	?>
@@ -387,11 +387,11 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 
       return;
 
-      // Not needed as all bitcoinway's settings are now inside BWWC plugin.
+      // Not needed as all bitcoinway's settings are now inside BCHWC plugin.
       //
     	// if (isset($_POST) && is_array($_POST))
     	// {
-	  		// $bchwc_settings = BWWC__get_settings ();
+	  		// $bchwc_settings = BCHWC__get_settings ();
 	  		// if (!isset($bchwc_settings['gateway_settings']) || !is_array($bchwc_settings['gateway_settings']))
 	  		// 	$bchwc_settings['gateway_settings'] = array();
 
@@ -409,8 +409,8 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	    // 		}
 	    // 	}
 
-	  		// // Update gateway settings within BWWC own settings for easier access.
-	    //   BWWC__update_settings ($bchwc_settings);
+	  		// // Update gateway settings within BCHWC own settings for easier access.
+	    //   BCHWC__update_settings ($bchwc_settings);
 	    // }
     }
 		//-------------------------------------------------------------------
@@ -425,7 +425,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	     */
 		function process_payment ($order_id)
 		{
-      $bchwc_settings = BWWC__get_settings ();
+      $bchwc_settings = BCHWC__get_settings ();
 			$order = new WC_Order ($order_id);
 
 			// TODO: Implement CRM features within store admin dashboard
@@ -446,13 +446,13 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 			//
 			// Calculate realtime bitcoin price (if exchange is necessary)
 
-			$exchange_rate = BWWC__get_exchange_rate_per_bitcoin (get_woocommerce_currency(), 'getfirst');
-			/// $exchange_rate = BWWC__get_exchange_rate_per_bitcoin (get_woocommerce_currency(), $this->exchange_rate_retrieval_method, $this->exchange_rate_type);
+			$exchange_rate = BCHWC__get_exchange_rate_per_bitcoin (get_woocommerce_currency(), 'getfirst');
+			/// $exchange_rate = BCHWC__get_exchange_rate_per_bitcoin (get_woocommerce_currency(), $this->exchange_rate_retrieval_method, $this->exchange_rate_type);
 			if (!$exchange_rate)
 			{
 				$msg = 'ERROR: Cannot determine Bitcoin Cash exchange rate. Possible issues: store server does not allow outgoing connections, exchange rate servers are blocking incoming connections or down. ' .
 					   'You may avoid that by setting store currency directly to Bitcoin Cash (BCH)';
-      			BWWC__log_event (__FILE__, __LINE__, $msg);
+      			BCHWC__log_event (__FILE__, __LINE__, $msg);
       			exit ('<h2 style="color:red;">' . $msg . '</h2>');
 			}
 
@@ -473,7 +473,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
   				'order_datetime'  				=> date('Y-m-d H:i:s T'),
   				'requested_by_ip'					=> @$_SERVER['REMOTE_ADDR'],
   				'requested_by_ua'					=> @$_SERVER['HTTP_USER_AGENT'],
-  				'requested_by_srv'				=> BWWC__base64_encode(serialize($_SERVER)),
+  				'requested_by_srv'				=> BCHWC__base64_encode(serialize($_SERVER)),
   				);
 
   		$ret_info_array = array();
@@ -482,11 +482,11 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 			{
 				$bitcoin_addr_merchant = $this->bitcoin_addr_merchant;
 				$secret_key = substr(md5(microtime()), 0, 16);	# Generate secret key to be validate upon receiving IPN callback to prevent spoofing.
-				$callback_url = trailingslashit (home_url()) . "?wc-api=BWWC_Bitcoin&secret_key={$secret_key}&bitcoinway=1&src=bcinfo&order_id={$order_id}"; // http://www.example.com/?bitcoinway=1&order_id=74&src=bcinfo
-	   		BWWC__log_event (__FILE__, __LINE__, "Calling BWWC__generate_temporary_bitcoin_address__blockchain_info(). Payments to be forwarded to: '{$bitcoin_addr_merchant}' with callback URL: '{$callback_url}' ...");
+				$callback_url = trailingslashit (home_url()) . "?wc-api=BCHWC_Bitcoin&secret_key={$secret_key}&bitcoinway=1&src=bcinfo&order_id={$order_id}"; // http://www.example.com/?bitcoinway=1&order_id=74&src=bcinfo
+	   		BCHWC__log_event (__FILE__, __LINE__, "Calling BCHWC__generate_temporary_bitcoin_address__blockchain_info(). Payments to be forwarded to: '{$bitcoin_addr_merchant}' with callback URL: '{$callback_url}' ...");
 
 	   			// This function generates temporary bitcoin address and schedules IPN callback at the same
-				$ret_info_array = BWWC__generate_temporary_bitcoin_address__blockchain_info ($bitcoin_addr_merchant, $callback_url);
+				$ret_info_array = BCHWC__generate_temporary_bitcoin_address__blockchain_info ($bitcoin_addr_merchant, $callback_url);
 	
 				/*
             $ret_info_array = array (
@@ -509,18 +509,18 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
                'generated_bitcoin_address'   => '18vzABPyVbbia8TDCKDtXJYXcoAFAPk2cj', // or false
                );
 				*/
-				$ret_info_array = BWWC__get_bitcoin_address_for_payment__electrum (BWWC__get_next_available_mpk(), $order_info);
+				$ret_info_array = BCHWC__get_bitcoin_address_for_payment__electrum (BCHWC__get_next_available_mpk(), $order_info);
 				$bitcoins_address = @$ret_info_array['generated_bitcoin_address'];
 			}
 
 			if (!$bitcoins_address)
 			{
 				$msg = "ERROR: cannot generate bitcoin cash address for the order: '" . @$ret_info_array['message'] . "'";
-      			BWWC__log_event (__FILE__, __LINE__, $msg);
+      			BCHWC__log_event (__FILE__, __LINE__, $msg);
       			exit ('<h2 style="color:red;">' . $msg . '</h2>');
 			}
 
-   		BWWC__log_event (__FILE__, __LINE__, "     Generated unique bitcoin cash address: '{$bitcoins_address}' for order_id " . $order_id);
+   		BCHWC__log_event (__FILE__, __LINE__, "     Generated unique bitcoin cash address: '{$bitcoins_address}' for order_id " . $order_id);
 
 			if ($this->service_provider == 'blockchain_info')
 			{
@@ -621,9 +621,9 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	     * @access public
 	     * @return void
 	     */
-		function BWWC__thankyou_page($order_id)
+		function BCHWC__thankyou_page($order_id)
 		{
-			// BWWC__thankyou_page is hooked into the "thank you" page and in the simplest case can just echo’s the description.
+			// BCHWC__thankyou_page is hooked into the "thank you" page and in the simplest case can just echo’s the description.
 
 			// Get order object.
 			// http://wcdocs.woothemes.com/apidocs/class-WC_Order.html
@@ -659,7 +659,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	     * @param bool $sent_to_admin
 	     * @return void
 	     */
-		function BWWC__email_instructions ($order, $sent_to_admin)
+		function BCHWC__email_instructions ($order, $sent_to_admin)
 		{
 	    	if ($sent_to_admin) return;
 	    	if (!in_array($order->status, array('pending', 'on-hold'), true)) return;
@@ -692,17 +692,17 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 		 * @access public
 		 * @return void
 		 */
-		function BWWC__maybe_bitcoin_ipn_callback ()
+		function BCHWC__maybe_bitcoin_ipn_callback ()
 		{
 			// If example.com/?bitcoinway=1 is present - it is callback URL.
 			if (isset($_REQUEST['bitcoinway']) && $_REQUEST['bitcoinway'] == '1')
 			{
-     		BWWC__log_event (__FILE__, __LINE__, "BWWC__maybe_bitcoin_ipn_callback () called and 'bitcoinway=1' detected. REQUEST  =  " . serialize(@$_REQUEST));
+     		BCHWC__log_event (__FILE__, __LINE__, "BCHWC__maybe_bitcoin_ipn_callback () called and 'bitcoinway=1' detected. REQUEST  =  " . serialize(@$_REQUEST));
 
 				if (@$_GET['src'] != 'bcinfo')
 				{
 					$src = $_GET['src'];
-					BWWC__log_event (__FILE__, __LINE__, "Warning: received IPN notification with 'src'= '{$src}', which is not matching expected: 'bcinfo'. Ignoring ...");
+					BCHWC__log_event (__FILE__, __LINE__, "Warning: received IPN notification with 'src'= '{$src}', which is not matching expected: 'bcinfo'. Ignoring ...");
 					exit();
 				}
 
@@ -716,7 +716,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 				// Check the Request secret_key matches the original one (blockchain.info sends all params back)
 				if ($secret_key_sent != $secret_key)
 				{
-     			BWWC__log_event (__FILE__, __LINE__, "Warning: secret_key does not match! secret_key sent: '{$secret_key_sent}'. Expected: '{$secret_key}'. Processing aborted.");
+     			BCHWC__log_event (__FILE__, __LINE__, "Warning: secret_key does not match! secret_key sent: '{$secret_key_sent}'. Expected: '{$secret_key}'. Processing aborted.");
      			exit ('Invalid secret_key');
 				}
 
@@ -757,11 +757,11 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 					$order_total_in_btc = get_post_meta($order_id, 'order_total_in_btc', true);
 					if ($paid_total_so_far >= $order_total_in_btc)
 					{
-						BWWC__process_payment_completed_for_order ($order_id, false);
+						BCHWC__process_payment_completed_for_order ($order_id, false);
 					}
 					else
 					{
-     				BWWC__log_event (__FILE__, __LINE__, "NOTE: Payment received (for BCH {$value_in_btc}), but not enough yet to cover the required total. Will be waiting for more. Bitcoin Cash: now/total received/needed = {$value_in_btc}/{$paid_total_so_far}/{$order_total_in_btc}");
+     				BCHWC__log_event (__FILE__, __LINE__, "NOTE: Payment received (for BCH {$value_in_btc}), but not enough yet to cover the required total. Will be waiting for more. Bitcoin Cash: now/total received/needed = {$value_in_btc}/{$paid_total_so_far}/{$order_total_in_btc}");
 					}
 
 			    // Reply '*ok*' so no more notifications are sent
@@ -771,7 +771,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 				{
 					// Number of confirmations are not there yet... Skip it this time ...
 			    // Don't print *ok* so the notification resent again on next confirmation
-   				BWWC__log_event (__FILE__, __LINE__, "NOTE: Payment notification received (for BCH {$value_in_btc}), but number of confirmations is not enough yet. Confirmations received/required: {$confirmations}/{$this->confs_num}");
+   				BCHWC__log_event (__FILE__, __LINE__, "NOTE: Payment notification received (for BCH {$value_in_btc}), but number of confirmations is not enough yet. Confirmations received/required: {$confirmations}/{$this->confs_num}");
 			    exit();
 				}
 			}
@@ -783,18 +783,18 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 
 	//-----------------------------------------------------------------------
 	// Hook into WooCommerce - add necessary hooks and filters
-	add_filter ('woocommerce_payment_gateways', 	'BWWC__add_bitcoin_gateway' );
+	add_filter ('woocommerce_payment_gateways', 	'BCHWC__add_bitcoin_gateway' );
 
 	// Disable unnecessary billing fields.
 	/// Note: it affects whole store.
-	/// add_filter ('woocommerce_checkout_fields' , 	'BWWC__woocommerce_checkout_fields' );
+	/// add_filter ('woocommerce_checkout_fields' , 	'BCHWC__woocommerce_checkout_fields' );
 
-	add_filter ('woocommerce_currencies', 			'BWWC__add_btc_currency');
-	add_filter ('woocommerce_currency_symbol', 		'BWWC__add_btc_currency_symbol', 10, 2);
+	add_filter ('woocommerce_currencies', 			'BCHWC__add_btc_currency');
+	add_filter ('woocommerce_currency_symbol', 		'BCHWC__add_btc_currency_symbol', 10, 2);
 
 	// Change [Order] button text on checkout screen.
     /// Note: this will affect all payment methods.
-    /// add_filter ('woocommerce_order_button_text', 	'BWWC__order_button_text');
+    /// add_filter ('woocommerce_order_button_text', 	'BCHWC__order_button_text');
 	//-----------------------------------------------------------------------
 
 	//=======================================================================
@@ -807,16 +807,16 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	 * @return array/
 
 	 */
-	function BWWC__add_bitcoin_gateway( $methods )
+	function BCHWC__add_bitcoin_gateway( $methods )
 	{
-		$methods[] = 'BWWC_Bitcoin';
+		$methods[] = 'BCHWC_Bitcoin';
 		return $methods;
 	}
 	//=======================================================================
 
 	//=======================================================================
 	// Our hooked in function - $fields is passed via the filter!
-	function BWWC__woocommerce_checkout_fields ($fields)
+	function BCHWC__woocommerce_checkout_fields ($fields)
 	{
 	     unset($fields['order']['order_comments']);
 	     unset($fields['billing']['billing_first_name']);
@@ -834,7 +834,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	//=======================================================================
 
 	//=======================================================================
-	function BWWC__add_btc_currency($currencies)
+	function BCHWC__add_btc_currency($currencies)
 	{
 	     $currencies['BCH'] = __( 'Bitcoin Cash (฿)', 'woocommerce' );
 	     return $currencies;
@@ -842,7 +842,7 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	//=======================================================================
 
 	//=======================================================================
-	function BWWC__add_btc_currency_symbol($currency_symbol, $currency)
+	function BCHWC__add_btc_currency_symbol($currency_symbol, $currency)
 	{
 		switch( $currency )
 		{
@@ -856,13 +856,13 @@ function BWWC__plugins_loaded__load_bitcoin_gateway ()
 	//=======================================================================
 
 	//=======================================================================
- 	function BWWC__order_button_text () { return 'Continue'; }
+ 	function BCHWC__order_button_text () { return 'Continue'; }
 	//=======================================================================
 }
 //###########################################################################
 
 //===========================================================================
-function BWWC__process_payment_completed_for_order ($order_id, $bitcoins_paid=false)
+function BCHWC__process_payment_completed_for_order ($order_id, $bitcoins_paid=false)
 {
 
 	if ($bitcoins_paid)
@@ -874,7 +874,7 @@ function BWWC__process_payment_completed_for_order ($order_id, $bitcoins_paid=fa
 	{
 		update_post_meta ($order_id, '_payment_completed', '1');
 
-		BWWC__log_event (__FILE__, __LINE__, "Success: order '{$order_id}' paid in full. Processing and notifying customer ...");
+		BCHWC__log_event (__FILE__, __LINE__, "Success: order '{$order_id}' paid in full. Processing and notifying customer ...");
 
 		// Instantiate order object.
 		$order = new WC_Order($order_id);
@@ -882,7 +882,7 @@ function BWWC__process_payment_completed_for_order ($order_id, $bitcoins_paid=fa
 
 	  $order->payment_complete();
 
-    $bchwc_settings = BWWC__get_settings();
+    $bchwc_settings = BCHWC__get_settings();
 		if ($bchwc_settings['autocomplete_paid_orders'])
 		{
   		// Ensure order is completed.
@@ -896,7 +896,7 @@ function BWWC__process_payment_completed_for_order ($order_id, $bitcoins_paid=fa
 		if ($email)
 		{
 			// Send email from admin to admin
-			BWWC__send_email ($email, $email, "Full payment received for order ID: '{$order_id}'",
+			BCHWC__send_email ($email, $email, "Full payment received for order ID: '{$order_id}'",
 				"Order ID: '{$order_id}' paid in full. <br />Received BCH: '$bitcoins_paid'.<br />Please process and complete order for customer."
 				);
 		}

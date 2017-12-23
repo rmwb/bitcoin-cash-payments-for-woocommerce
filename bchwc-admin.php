@@ -10,18 +10,18 @@ include (dirname(__FILE__) . '/bchwc-include-all.php');
 //===========================================================================
 // Global vars.
 
-global $g_BWWC__plugin_directory_url;
-$g_BWWC__plugin_directory_url = plugins_url ('', __FILE__);
+global $g_BCHWC__plugin_directory_url;
+$g_BCHWC__plugin_directory_url = plugins_url ('', __FILE__);
 
-global $g_BWWC__cron_script_url;
-$g_BWWC__cron_script_url = $g_BWWC__plugin_directory_url . '/bchwc-cron.php';
+global $g_BCHWC__cron_script_url;
+$g_BCHWC__cron_script_url = $g_BCHWC__plugin_directory_url . '/bchwc-cron.php';
 
 //===========================================================================
 
 //===========================================================================
 // Global default settings
-global $g_BWWC__config_defaults;
-$g_BWWC__config_defaults = array (
+global $g_BCHWC__config_defaults;
+$g_BCHWC__config_defaults = array (
 
    // ------- Hidden constants
 // 'supported_currencies_arr'             =>  array ('USD', 'AUD', 'CAD', 'CHF', 'CNY', 'DKK', 'EUR', 'GBP', 'HKD', 'JPY', 'NZD', 'PLN', 'RUB', 'SEK', 'SGD', 'THB'), // Not used right now.
@@ -59,7 +59,7 @@ $g_BWWC__config_defaults = array (
    'autocomplete_paid_orders'							=>  '1',
    'enable_soft_cron_job'                 =>  '1',    // Enable "soft" Wordpress-driven cron jobs.
 
-   // ------- Copy of $this->settings of 'BWWC_Bitcoin' class.
+   // ------- Copy of $this->settings of 'BCHWC_Bitcoin' class.
    // DEPRECATED (only blockchain.info related settings still remain there.)
    'gateway_settings'                     =>  array('confirmations' => 6),
 
@@ -69,12 +69,12 @@ $g_BWWC__config_defaults = array (
 //===========================================================================
 
 //===========================================================================
-function BWWC__GetPluginNameVersionEdition($please_donate = true)
+function BCHWC__GetPluginNameVersionEdition($please_donate = true)
 {
   $return_data = '<h2 style="border-bottom:1px solid #DDD;padding-bottom:10px;margin-bottom:20px;">' .
-            BWWC_PLUGIN_NAME . ', version: <span style="color:#EE0000;">' .
-            BWWC_VERSION. '</span> [<span style="color:#EE0000;background-color:#FFFF77;">&nbsp;' .
-            BWWC_EDITION . '&nbsp;</span> edition]' .
+            BCHWC_PLUGIN_NAME . ', version: <span style="color:#EE0000;">' .
+            BCHWC_VERSION. '</span> [<span style="color:#EE0000;background-color:#FFFF77;">&nbsp;' .
+            BCHWC_EDITION . '&nbsp;</span> edition]' .
           '</h2>';
 
 
@@ -88,16 +88,16 @@ function BWWC__GetPluginNameVersionEdition($please_donate = true)
 //===========================================================================
 
 //===========================================================================
-function BWWC__GetProUrl() { return 'http://google.com'; }
-function BWWC__GetProLabel()
+function BCHWC__GetProUrl() { return 'http://google.com'; }
+function BCHWC__GetProLabel()
 {
-   return '<span style="background-color:#FF4;color:#F44;border:1px solid #F44;padding:2px 6px;font-family:\'Open Sans\',sans-serif;font-size:14px;border-radius:6px;"><a href="' . BWWC__GetProUrl() . '">PRO Only</a></span>';
+   return '<span style="background-color:#FF4;color:#F44;border:1px solid #F44;padding:2px 6px;font-family:\'Open Sans\',sans-serif;font-size:14px;border-radius:6px;"><a href="' . BCHWC__GetProUrl() . '">PRO Only</a></span>';
 }
 //===========================================================================
 
 //===========================================================================
 // These are coming from plugin-specific table.
-function BWWC__get_persistent_settings ($key=false)
+function BCHWC__get_persistent_settings ($key=false)
 {
 ////// PERSISTENT SETTINGS CURRENTLY UNUSED
 return array();
@@ -122,7 +122,7 @@ return array();
 //===========================================================================
 
 //===========================================================================
-function BWWC__update_persistent_settings ($bchwc_use_these_settings_array=false)
+function BCHWC__update_persistent_settings ($bchwc_use_these_settings_array=false)
 {
 ////// PERSISTENT SETTINGS CURRENTLY UNUSED
 return;
@@ -134,7 +134,7 @@ return;
   if (!$bchwc_use_these_settings)
     $bchwc_use_these_settings = array();
 
-  $db_ready_settings = BWWC__safe_string_escape (serialize($bchwc_use_these_settings_array));
+  $db_ready_settings = BCHWC__safe_string_escape (serialize($bchwc_use_these_settings_array));
 
   $wpdb->update($persistent_settings_table_name, array('settings' => $db_ready_settings), array('id' => '1'), array('%s'));
 }
@@ -142,18 +142,18 @@ return;
 
 //===========================================================================
 // Wipe existing table's contents and recreate first record with all defaults.
-function BWWC__reset_all_persistent_settings ()
+function BCHWC__reset_all_persistent_settings ()
 {
 ////// PERSISTENT SETTINGS CURRENTLY UNUSED
 return;
 //////
 
   global $wpdb;
-  global $g_BWWC__config_defaults;
+  global $g_BCHWC__config_defaults;
 
   $persistent_settings_table_name = $wpdb->prefix . 'bchwc_persistent_settings';
 
-  $initial_settings = BWWC__safe_string_escape (serialize($g_BWWC__config_defaults));
+  $initial_settings = BCHWC__safe_string_escape (serialize($g_BCHWC__config_defaults));
 
   $query = "TRUNCATE TABLE `$persistent_settings_table_name`;";
   $wpdb->query ($query);
@@ -167,12 +167,12 @@ return;
 //===========================================================================
 
 //===========================================================================
-function BWWC__get_settings ($key=false)
+function BCHWC__get_settings ($key=false)
 {
-  global   $g_BWWC__plugin_directory_url;
-  global   $g_BWWC__config_defaults;
+  global   $g_BCHWC__plugin_directory_url;
+  global   $g_BCHWC__config_defaults;
 
-  $bchwc_settings = get_option (BWWC_SETTINGS_NAME);
+  $bchwc_settings = get_option (BCHWC_SETTINGS_NAME);
   if (!is_array($bchwc_settings))
     $bchwc_settings = array();
 
@@ -185,29 +185,29 @@ function BWWC__get_settings ($key=false)
 //===========================================================================
 
 //===========================================================================
-function BWWC__update_settings ($bchwc_use_these_settings=false, $also_update_persistent_settings=false)
+function BCHWC__update_settings ($bchwc_use_these_settings=false, $also_update_persistent_settings=false)
 {
    if ($bchwc_use_these_settings)
       {
       if ($also_update_persistent_settings)
-        BWWC__update_persistent_settings ($bchwc_use_these_settings);
+        BCHWC__update_persistent_settings ($bchwc_use_these_settings);
 
-      update_option (BWWC_SETTINGS_NAME, $bchwc_use_these_settings);
+      update_option (BCHWC_SETTINGS_NAME, $bchwc_use_these_settings);
       return;
       }
 
-   global   $g_BWWC__config_defaults;
+   global   $g_BCHWC__config_defaults;
 
    // Load current settings and overwrite them with whatever values are present on submitted form
-   $bchwc_settings = BWWC__get_settings();
+   $bchwc_settings = BCHWC__get_settings();
 
-   foreach ($g_BWWC__config_defaults as $k=>$v)
+   foreach ($g_BCHWC__config_defaults as $k=>$v)
       {
       if (isset($_POST[$k]))
          {
          if (!isset($bchwc_settings[$k]))
             $bchwc_settings[$k] = ""; // Force set to something.
-         BWWC__update_individual_bchwc_setting ($bchwc_settings[$k], $_POST[$k]);
+         BCHWC__update_individual_bchwc_setting ($bchwc_settings[$k], $_POST[$k]);
          }
       // If not in POST - existing will be used.
       }
@@ -227,18 +227,18 @@ function BWWC__update_settings ($bchwc_use_these_settings=false, $also_update_pe
 
 
   if ($also_update_persistent_settings)
-    BWWC__update_persistent_settings ($bchwc_settings);
+    BCHWC__update_persistent_settings ($bchwc_settings);
 
-  update_option (BWWC_SETTINGS_NAME, $bchwc_settings);
+  update_option (BCHWC_SETTINGS_NAME, $bchwc_settings);
 }
 //===========================================================================
 
 //===========================================================================
 // Takes care of recursive updating
-function BWWC__update_individual_bchwc_setting (&$bchwc_current_setting, $bchwc_new_setting)
+function BCHWC__update_individual_bchwc_setting (&$bchwc_current_setting, $bchwc_new_setting)
 {
    if (is_string($bchwc_new_setting))
-      $bchwc_current_setting = BWWC__stripslashes ($bchwc_new_setting);
+      $bchwc_current_setting = BCHWC__stripslashes ($bchwc_new_setting);
    else if (is_array($bchwc_new_setting))  // Note: new setting may not exist yet in current setting: curr[t5] - not set yet, while new[t5] set.
       {
       // Need to do recursive
@@ -246,7 +246,7 @@ function BWWC__update_individual_bchwc_setting (&$bchwc_current_setting, $bchwc_
          {
          if (!isset($bchwc_current_setting[$k]))
             $bchwc_current_setting[$k] = "";   // If not set yet - force set it to something.
-         BWWC__update_individual_bchwc_setting ($bchwc_current_setting[$k], $v);
+         BCHWC__update_individual_bchwc_setting ($bchwc_current_setting[$k], $v);
          }
       }
    else
@@ -257,45 +257,45 @@ function BWWC__update_individual_bchwc_setting (&$bchwc_current_setting, $bchwc_
 //===========================================================================
 //
 // Reset settings only for one screen
-function BWWC__reset_partial_settings ($also_reset_persistent_settings=false)
+function BCHWC__reset_partial_settings ($also_reset_persistent_settings=false)
 {
-   global   $g_BWWC__config_defaults;
+   global   $g_BCHWC__config_defaults;
 
    // Load current settings and overwrite ones that are present on submitted form with defaults
-   $bchwc_settings = BWWC__get_settings();
+   $bchwc_settings = BCHWC__get_settings();
 
    foreach ($_POST as $k=>$v)
       {
-      if (isset($g_BWWC__config_defaults[$k]))
+      if (isset($g_BCHWC__config_defaults[$k]))
          {
          if (!isset($bchwc_settings[$k]))
             $bchwc_settings[$k] = ""; // Force set to something.
-         BWWC__update_individual_bchwc_setting ($bchwc_settings[$k], $g_BWWC__config_defaults[$k]);
+         BCHWC__update_individual_bchwc_setting ($bchwc_settings[$k], $g_BCHWC__config_defaults[$k]);
          }
       }
 
-  update_option (BWWC_SETTINGS_NAME, $bchwc_settings);
+  update_option (BCHWC_SETTINGS_NAME, $bchwc_settings);
 
   if ($also_reset_persistent_settings)
-    BWWC__update_persistent_settings ($bchwc_settings);
+    BCHWC__update_persistent_settings ($bchwc_settings);
 }
 //===========================================================================
 
 //===========================================================================
-function BWWC__reset_all_settings ($also_reset_persistent_settings=false)
+function BCHWC__reset_all_settings ($also_reset_persistent_settings=false)
 {
-  global   $g_BWWC__config_defaults;
+  global   $g_BCHWC__config_defaults;
 
-  update_option (BWWC_SETTINGS_NAME, $g_BWWC__config_defaults);
+  update_option (BCHWC_SETTINGS_NAME, $g_BCHWC__config_defaults);
 
   if ($also_reset_persistent_settings)
-    BWWC__reset_all_persistent_settings ();
+    BCHWC__reset_all_persistent_settings ();
 }
 //===========================================================================
 
 //===========================================================================
 // Recursively strip slashes from all elements of multi-nested array
-function BWWC__stripslashes (&$val)
+function BCHWC__stripslashes (&$val)
 {
    if (is_string($val))
       return (stripslashes($val));
@@ -304,7 +304,7 @@ function BWWC__stripslashes (&$val)
 
    foreach ($val as $k=>$v)
       {
-      $val[$k] = BWWC__stripslashes ($v);
+      $val[$k] = BCHWC__stripslashes ($v);
       }
 
    return $val;
@@ -323,11 +323,11 @@ function BWWC__stripslashes (&$val)
                             "xused"       - address was used (touched with funds) by unknown entity outside of this application. No metadata is present for this address, will not be able to correlated it with any order.
                             "unknown"     - new address was generated but cannot retrieve balance due to blockchain API failure.
 */
-function BWWC__create_database_tables ($bchwc_settings)
+function BCHWC__create_database_tables ($bchwc_settings)
 {
   global $wpdb;
 
-  $bchwc_settings = BWWC__get_settings();
+  $bchwc_settings = BCHWC__get_settings();
   $must_update_settings = false;
 
   ///$persistent_settings_table_name       = $wpdb->prefix . 'bchwc_persistent_settings';
@@ -422,7 +422,7 @@ function BWWC__create_database_tables ($bchwc_settings)
         if (!@$bchwc_settings['electrum_mpk_saved'])
         {
           $bchwc_settings['electrum_mpk_saved'] = $mpk;
-          // 'BWWC__update_settings()' will populate $bchwc_settings['electrum_mpks'].
+          // 'BCHWC__update_settings()' will populate $bchwc_settings['electrum_mpks'].
         }
       }
     }
@@ -440,16 +440,16 @@ function BWWC__create_database_tables ($bchwc_settings)
 
   if ($must_update_settings)
   {
-	  BWWC__update_settings ($bchwc_settings);
+	  BCHWC__update_settings ($bchwc_settings);
 	}
 
   //----------------------------------------------------------
   // Seed DB tables with initial set of data
   /* PERSISTENT SETTINGS CURRENTLY UNUNSED
-  if ($b_first_time || !is_array(BWWC__get_persistent_settings()))
+  if ($b_first_time || !is_array(BCHWC__get_persistent_settings()))
   {
     // Wipes table and then creates first record and populate it with defaults
-    BWWC__reset_all_persistent_settings();
+    BCHWC__reset_all_persistent_settings();
   }
   */
    //----------------------------------------------------------
@@ -458,7 +458,7 @@ function BWWC__create_database_tables ($bchwc_settings)
 
 //===========================================================================
 // NOTE: Irreversibly deletes all plugin tables and data
-function BWWC__delete_database_tables ()
+function BCHWC__delete_database_tables ()
 {
   global $wpdb;
 
