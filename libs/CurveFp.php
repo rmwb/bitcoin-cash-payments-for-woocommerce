@@ -28,6 +28,7 @@
  *  - Does the curve contain a point?
  *  - Comparison of two curves.
  */
+if(!class_exists('CurveFp')){
 class CurveFp
 {
     //Elliptic curve over the field of integers modulo a prime
@@ -106,5 +107,5 @@ class CurveFp
     }
 
 }
-
+}
 ?>
